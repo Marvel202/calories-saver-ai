@@ -1,0 +1,126 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { insertMealAnalysisSchema, nutritionDataSchema } from "@shared/schema";
+import { z } from "zod";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Object storage routes for public file uploading
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error accessing object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  app.post("/api/objects/upload", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Meal analysis endpoint
+  app.post("/api/analyze-meal", async (req, res) => {
+    try {
+      const { imageUrl } = req.body;
+      
+      if (!imageUrl) {
+        return res.status(400).json({ error: "Image URL is required" });
+      }
+
+      // Normalize the object path for storage
+      const objectStorageService = new ObjectStorageService();
+      const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
+
+      // Call n8n workflow for meal analysis
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://example-n8n-workflow.com/webhook/analyze-meal";
+      
+      const n8nResponse = await fetch(n8nWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrl: normalizedPath,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!n8nResponse.ok) {
+        throw new Error(`n8n workflow failed: ${n8nResponse.status}`);
+      }
+
+      const n8nData = await n8nResponse.json();
+      
+      // Validate the nutrition data from n8n
+      const nutrition = nutritionDataSchema.parse(n8nData.nutrition || n8nData);
+      
+      // Store the analysis in memory
+      const analysis = await storage.createMealAnalysis({
+        imageUrl: normalizedPath,
+        nutrition,
+      });
+
+      res.json({
+        analysisId: analysis.id,
+        nutrition,
+        imageUrl: normalizedPath,
+      });
+
+    } catch (error) {
+      console.error("Error analyzing meal:", error);
+      res.status(500).json({ 
+        error: "Failed to analyze meal",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Feedback endpoint
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const { imageUrl, rating, nutrition } = req.body;
+      
+      if (!imageUrl || !rating || !nutrition) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      if (rating < 1 || rating > 4) {
+        return res.status(400).json({ error: "Rating must be between 1 and 4" });
+      }
+
+      // Find the analysis by imageUrl (in a real app, you'd pass the analysisId)
+      // For now, we'll create a feedback entry
+      const feedbackAnalysis = await storage.createMealAnalysis({
+        imageUrl,
+        nutrition,
+        feedback: rating,
+      });
+
+      res.json({ 
+        success: true,
+        feedbackId: feedbackAnalysis.id 
+      });
+
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      res.status(500).json({ error: "Failed to submit feedback" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}

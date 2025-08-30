@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 20%, 98%);
+  --foreground: hsl(215, 20%, 20%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(215, 20%, 20%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(215, 20%, 20%);
+  --primary: hsl(158, 64%, 52%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(351, 95%, 71%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(217, 10%, 97%);
+  --muted-foreground: hsl(215, 15%, 45%);
+  --accent: hsl(237, 73%, 69%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(220, 13%, 91%);
+  --input: hsl(220, 13%, 91%);
+  --ring: hsl(158, 64%, 52%);
+  --chart-1: hsl(158, 64%, 52%);
+  --chart-2: hsl(351, 95%, 71%);
+  --chart-3: hsl(237, 73%, 69%);
+  --chart-4: hsl(42, 93%, 57%);
+  --chart-5: hsl(280, 65%, 60%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(215, 20%, 20%);
+  --sidebar-primary: hsl(158, 64%, 52%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(217, 10%, 97%);
+  --sidebar-accent-foreground: hsl(158, 64%, 52%);
+  --sidebar-border: hsl(220, 13%, 91%);
+  --sidebar-ring: hsl(158, 64%, 52%);
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 8px;
+  --shadow-2xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 2px 4px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 4px 6px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 8px 10px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(215, 20%, 8%);
+  --foreground: hsl(210, 20%, 92%);
+  --card: hsl(215, 20%, 12%);
+  --card-foreground: hsl(210, 20%, 92%);
+  --popover: hsl(215, 20%, 8%);
+  --popover-foreground: hsl(210, 20%, 92%);
+  --primary: hsl(158, 64%, 52%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(351, 95%, 71%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(215, 20%, 15%);
+  --muted-foreground: hsl(215, 15%, 60%);
+  --accent: hsl(237, 73%, 69%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(215, 20%, 20%);
+  --input: hsl(215, 20%, 20%);
+  --ring: hsl(158, 64%, 52%);
+  --sidebar: hsl(215, 20%, 12%);
+  --sidebar-foreground: hsl(210, 20%, 92%);
+  --sidebar-primary: hsl(158, 64%, 52%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(215, 20%, 15%);
+  --sidebar-accent-foreground: hsl(158, 64%, 52%);
+  --sidebar-border: hsl(215, 20%, 20%);
+  --sidebar-ring: hsl(158, 64%, 52%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Neomorphic styles */
+.neomorphic {
+  background: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(216, 12%, 96%));
+  box-shadow: 8px 8px 16px hsl(220, 15%, 85%), -8px -8px 16px hsl(0, 0%, 100%);
+}
+
+.neomorphic-inset {
+  background: linear-gradient(145deg, hsl(216, 12%, 96%), hsl(0, 0%, 100%));
+  box-shadow: inset 6px 6px 12px hsl(220, 15%, 85%), inset -6px -6px 12px hsl(0, 0%, 100%);
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hover-lift {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 12px 12px 24px hsl(220, 15%, 80%), -12px -12px 24px hsl(0, 0%, 100%);
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 hsla(158, 64%, 52%, 0.7); 
+  }
+  50% { 
+    box-shadow: 0 0 0 10px hsla(158, 64%, 52%, 0); 
+  }
+}
+
+.upload-area {
+  background: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(216, 12%, 96%));
+  border: 2px dashed hsl(158, 64%, 52%);
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: hsl(158, 64%, 45%);
+  background: linear-gradient(145deg, hsl(158, 64%, 98%), hsl(216, 12%, 96%));
+}
+
+.upload-area.dragover {
+  border-color: hsl(158, 64%, 45%);
+  background: linear-gradient(145deg, hsl(158, 64%, 96%), hsl(216, 12%, 94%));
+  transform: scale(1.02);
+}
+
+/* Dark mode neomorphic styles */
+.dark .neomorphic {
+  background: linear-gradient(145deg, hsl(215, 20%, 12%), hsl(215, 20%, 8%));
+  box-shadow: 8px 8px 16px hsl(215, 20%, 5%), -8px -8px 16px hsl(215, 20%, 15%);
+}
+
+.dark .neomorphic-inset {
+  background: linear-gradient(145deg, hsl(215, 20%, 8%), hsl(215, 20%, 12%));
+  box-shadow: inset 6px 6px 12px hsl(215, 20%, 5%), inset -6px -6px 12px hsl(215, 20%, 15%);
+}
+
+.dark .upload-area {
+  background: linear-gradient(145deg, hsl(215, 20%, 12%), hsl(215, 20%, 8%));
+  border: 2px dashed hsl(158, 64%, 52%);
+}
+
+.dark .upload-area:hover {
+  border-color: hsl(158, 64%, 45%);
+  background: linear-gradient(145deg, hsl(158, 64%, 8%), hsl(215, 20%, 8%));
+}
+
+.dark .glass-morphism {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
