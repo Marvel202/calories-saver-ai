@@ -38,30 +38,30 @@ export default function Home() {
       
       <main className="relative">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex flex-col justify-center px-4 py-8 overflow-hidden">
+        <section className="relative min-h-screen flex flex-col justify-center px-6 py-16 overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
           </div>
           
-          <div className="relative z-10 max-w-4xl mx-auto w-full">
+          <div className="relative z-10 max-w-5xl mx-auto w-full">
             {/* Main Hero Content */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 leading-tight">
+            <div className="text-center mb-16">
+              <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight tracking-tight">
                 Smart Nutrition
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {" "}Analysis
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block">
+                  Analysis
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed font-light">
                 Upload a photo of your meal and get instant macronutrient breakdown powered by AI. 
                 Track protein, carbs, and fat effortlessly.
               </p>
             </div>
 
             {/* Main Upload Card */}
-            <div className="relative mb-8">
+            <div className="relative mb-16">
               <PhotoUploadArea onAnalysisComplete={handleAnalysisComplete} />
             </div>
 

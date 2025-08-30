@@ -71,87 +71,87 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
   const feedbackEmojis = ['😞', '😐', '😊', '😍'];
 
   return (
-    <div className="space-y-6" data-testid="results-section">
+    <div className="space-y-8" data-testid="results-section">
       {/* Analysis Complete Card */}
-      <div className="neomorphic rounded-2xl p-6 hover-lift">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-            <CheckCircle className="text-primary" size={24} />
+      <div className="neomorphic rounded-3xl p-8 hover-lift">
+        <div className="flex items-center space-x-6 mb-6">
+          <div className="w-16 h-16 bg-primary/15 rounded-3xl flex items-center justify-center">
+            <CheckCircle className="text-primary" size={32} />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Analysis Complete</h3>
-            <p className="text-sm text-muted-foreground">Your meal has been analyzed</p>
+            <h3 className="text-xl font-bold text-foreground">Analysis Complete</h3>
+            <p className="text-muted-foreground font-light">Your meal has been analyzed</p>
           </div>
         </div>
         
-        <div className="rounded-xl overflow-hidden mb-4">
+        <div className="rounded-2xl overflow-hidden mb-6">
           <img 
             src={imageUrl} 
             alt="Analyzed meal" 
-            className="w-full h-48 object-cover"
+            className="w-full h-56 object-cover"
             data-testid="img-analyzed-meal"
           />
         </div>
       </div>
 
       {/* Macronutrient Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="neomorphic rounded-2xl p-6 text-center hover-lift">
-          <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Dumbbell className="text-primary" size={24} />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="neomorphic rounded-3xl p-8 text-center hover-lift">
+          <div className="w-16 h-16 bg-primary/15 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <Dumbbell className="text-primary" size={32} />
           </div>
-          <h4 className="font-semibold text-foreground mb-1">Protein</h4>
-          <p className="text-2xl font-bold text-primary" data-testid="text-protein">
+          <h4 className="font-bold text-foreground mb-2 text-lg">Protein</h4>
+          <p className="text-3xl font-bold text-primary mb-2" data-testid="text-protein">
             {nutrition.protein}g
           </p>
-          <p className="text-sm text-muted-foreground">Essential amino acids</p>
+          <p className="text-muted-foreground font-light">Essential amino acids</p>
         </div>
         
-        <div className="neomorphic rounded-2xl p-6 text-center hover-lift">
-          <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Wheat className="text-accent" size={24} />
+        <div className="neomorphic rounded-3xl p-8 text-center hover-lift">
+          <div className="w-16 h-16 bg-accent/15 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <Wheat className="text-accent" size={32} />
           </div>
-          <h4 className="font-semibold text-foreground mb-1">Carbs</h4>
-          <p className="text-2xl font-bold text-accent" data-testid="text-carbs">
+          <h4 className="font-bold text-foreground mb-2 text-lg">Carbs</h4>
+          <p className="text-3xl font-bold text-accent mb-2" data-testid="text-carbs">
             {nutrition.carbs}g
           </p>
-          <p className="text-sm text-muted-foreground">Energy source</p>
+          <p className="text-muted-foreground font-light">Energy source</p>
         </div>
         
-        <div className="neomorphic rounded-2xl p-6 text-center hover-lift">
-          <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Droplet className="text-secondary" size={24} />
+        <div className="neomorphic rounded-3xl p-8 text-center hover-lift">
+          <div className="w-16 h-16 bg-secondary/15 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <Droplet className="text-secondary" size={32} />
           </div>
-          <h4 className="font-semibold text-foreground mb-1">Fat</h4>
-          <p className="text-2xl font-bold text-secondary" data-testid="text-fat">
+          <h4 className="font-bold text-foreground mb-2 text-lg">Fat</h4>
+          <p className="text-3xl font-bold text-secondary mb-2" data-testid="text-fat">
             {nutrition.fat}g
           </p>
-          <p className="text-sm text-muted-foreground">Healthy fats</p>
+          <p className="text-muted-foreground font-light">Healthy fats</p>
         </div>
       </div>
 
       {/* Total Calories Card */}
-      <div className="neomorphic rounded-2xl p-6 hover-lift">
+      <div className="neomorphic rounded-3xl p-8 hover-lift">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="font-semibold text-foreground mb-1">Total Calories</h4>
-            <p className="text-sm text-muted-foreground">Estimated caloric content</p>
+            <h4 className="text-xl font-bold text-foreground mb-2">Total Calories</h4>
+            <p className="text-muted-foreground font-light">Estimated caloric content</p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-foreground" data-testid="text-calories">
+            <p className="text-4xl font-bold text-foreground" data-testid="text-calories">
               {nutrition.calories}
             </p>
-            <p className="text-sm text-muted-foreground">kcal</p>
+            <p className="text-muted-foreground font-light">kcal</p>
           </div>
         </div>
       </div>
 
       {/* Feedback Section */}
-      <div className="neomorphic rounded-2xl p-6">
-        <h4 className="font-semibold text-foreground mb-4 text-center">
+      <div className="neomorphic rounded-3xl p-8">
+        <h4 className="text-xl font-bold text-foreground mb-6 text-center">
           How accurate was this analysis?
         </h4>
-        <div className="flex justify-center space-x-4 mb-4">
+        <div className="flex justify-center space-x-6 mb-8">
           {feedbackEmojis.map((emoji, index) => {
             const rating = index + 1;
             return (
@@ -160,7 +160,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
                 variant="ghost"
                 size="icon"
                 onClick={() => handleFeedback(rating)}
-                className={`w-12 h-12 rounded-full text-xl hover-lift ${
+                className={`w-16 h-16 rounded-3xl text-2xl hover-lift ${
                   selectedFeedback === rating 
                     ? 'bg-primary text-primary-foreground' 
                     : 'neomorphic-inset'
@@ -173,22 +173,22 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           })}
         </div>
         
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-6">
           <Button 
             onClick={onRetry}
             variant="secondary"
-            className="px-6 py-3 bg-muted text-muted-foreground rounded-xl font-medium hover:bg-border transition-all flex items-center space-x-2"
+            className="px-8 py-4 bg-muted text-muted-foreground rounded-2xl font-semibold hover:bg-border transition-all flex items-center space-x-3 hover-lift"
             data-testid="button-retry"
           >
-            <RotateCcw size={20} />
+            <RotateCcw size={24} />
             <span>Try Another</span>
           </Button>
           <Button 
             onClick={handleShare}
-            className="px-6 py-3 bg-accent text-accent-foreground rounded-xl font-medium hover:bg-accent/90 transition-all flex items-center space-x-2"
+            className="px-8 py-4 bg-accent text-accent-foreground rounded-2xl font-semibold hover:bg-accent/90 transition-all flex items-center space-x-3 hover-lift"
             data-testid="button-share"
           >
-            <Share2 size={20} />
+            <Share2 size={24} />
             <span>Share</span>
           </Button>
         </div>

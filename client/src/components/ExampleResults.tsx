@@ -25,37 +25,39 @@ export function ExampleResults() {
   ];
 
   return (
-    <section className="px-4 py-16 bg-muted/50">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-foreground mb-4">
-          See It In Action
-        </h2>
-        <p className="text-center text-muted-foreground mb-12">
-          Examples of our AI nutrition analysis in action
-        </p>
+    <section className="px-6 py-24 bg-muted/30">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            See It In Action
+          </h2>
+          <p className="text-xl text-muted-foreground font-light">
+            Examples of our AI nutrition analysis in action
+          </p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {examples.map((example, index) => (
-            <div key={index} className="neomorphic rounded-2xl overflow-hidden hover-lift" data-testid={`example-${index + 1}`}>
+            <div key={index} className="neomorphic rounded-3xl overflow-hidden hover-lift" data-testid={`example-${index + 1}`}>
               <img 
                 src={example.image} 
                 alt={example.alt}
-                className="w-full h-48 object-cover"
+                className="w-full h-56 object-cover"
               />
-              <div className="p-6">
-                <h4 className="font-semibold text-foreground mb-4">{example.title}</h4>
-                <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-8">
+                <h4 className="text-xl font-bold text-foreground mb-6">{example.title}</h4>
+                <div className="grid grid-cols-3 gap-6 text-center">
                   <div>
-                    <p className="text-sm text-muted-foreground">Protein</p>
-                    <p className="font-bold text-primary">{example.nutrition.protein}g</p>
+                    <p className="text-muted-foreground font-light mb-2">Protein</p>
+                    <p className="text-2xl font-bold text-primary">{example.nutrition.protein}g</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Carbs</p>
-                    <p className="font-bold text-accent">{example.nutrition.carbs}g</p>
+                    <p className="text-muted-foreground font-light mb-2">Carbs</p>
+                    <p className="text-2xl font-bold text-accent">{example.nutrition.carbs}g</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Fat</p>
-                    <p className="font-bold text-secondary">{example.nutrition.fat}g</p>
+                    <p className="text-muted-foreground font-light mb-2">Fat</p>
+                    <p className="text-2xl font-bold text-secondary">{example.nutrition.fat}g</p>
                   </div>
                 </div>
               </div>

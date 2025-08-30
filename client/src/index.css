@@ -4,50 +4,45 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(210, 20%, 98%);
-  --foreground: hsl(215, 20%, 20%);
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(220, 15%, 25%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(215, 20%, 20%);
+  --card-foreground: hsl(220, 15%, 25%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(215, 20%, 20%);
-  --primary: hsl(158, 64%, 52%);
+  --popover-foreground: hsl(220, 15%, 25%);
+  --primary: hsl(356, 75%, 75%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(351, 95%, 71%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(217, 10%, 97%);
-  --muted-foreground: hsl(215, 15%, 45%);
-  --accent: hsl(237, 73%, 69%);
+  --secondary: hsl(356, 65%, 85%);
+  --secondary-foreground: hsl(220, 15%, 25%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(220, 10%, 55%);
+  --accent: hsl(356, 75%, 75%);
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(220, 13%, 91%);
-  --input: hsl(220, 13%, 91%);
-  --ring: hsl(158, 64%, 52%);
-  --chart-1: hsl(158, 64%, 52%);
-  --chart-2: hsl(351, 95%, 71%);
-  --chart-3: hsl(237, 73%, 69%);
-  --chart-4: hsl(42, 93%, 57%);
-  --chart-5: hsl(280, 65%, 60%);
+  --border: hsl(0, 0%, 92%);
+  --input: hsl(0, 0%, 95%);
+  --ring: hsl(356, 75%, 75%);
+  --chart-1: hsl(356, 75%, 75%);
+  --chart-2: hsl(356, 65%, 85%);
+  --chart-3: hsl(220, 10%, 65%);
+  --chart-4: hsl(42, 85%, 70%);
+  --chart-5: hsl(280, 55%, 70%);
   --sidebar: hsl(0, 0%, 100%);
-  --sidebar-foreground: hsl(215, 20%, 20%);
-  --sidebar-primary: hsl(158, 64%, 52%);
+  --sidebar-foreground: hsl(220, 15%, 25%);
+  --sidebar-primary: hsl(356, 75%, 75%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(217, 10%, 97%);
-  --sidebar-accent-foreground: hsl(158, 64%, 52%);
-  --sidebar-border: hsl(220, 13%, 91%);
-  --sidebar-ring: hsl(158, 64%, 52%);
+  --sidebar-accent: hsl(0, 0%, 96%);
+  --sidebar-accent-foreground: hsl(356, 75%, 75%);
+  --sidebar-border: hsl(0, 0%, 92%);
+  --sidebar-ring: hsl(356, 75%, 75%);
   --font-sans: 'Inter', sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 8px;
-  --shadow-2xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 2px 4px -1px hsl(158, 64%, 52% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 4px 6px -1px hsl(158, 64%, 52% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 8px 10px -1px hsl(158, 64%, 52% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --radius: 16px;
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.12);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 }
@@ -94,83 +89,92 @@
 
 /* Neomorphic styles */
 .neomorphic {
-  background: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(216, 12%, 96%));
-  box-shadow: 8px 8px 16px hsl(220, 15%, 85%), -8px -8px 16px hsl(0, 0%, 100%);
+  background: hsl(0, 0%, 100%);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid hsl(0, 0%, 94%);
 }
 
 .neomorphic-inset {
-  background: linear-gradient(145deg, hsl(216, 12%, 96%), hsl(0, 0%, 100%));
-  box-shadow: inset 6px 6px 12px hsl(220, 15%, 85%), inset -6px -6px 12px hsl(0, 0%, 100%);
+  background: hsl(0, 0%, 98%);
+  box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.06), inset -2px -2px 8px rgba(255, 255, 255, 0.8);
 }
 
 .glass-morphism {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .hover-lift {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 12px 12px 24px hsl(220, 15%, 80%), -12px -12px 24px hsl(0, 0%, 100%);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
 }
 
 .pulse-glow {
-  animation: pulse-glow 2s infinite;
+  animation: pulse-glow 3s infinite;
 }
 
 @keyframes pulse-glow {
   0%, 100% { 
-    box-shadow: 0 0 0 0 hsla(158, 64%, 52%, 0.7); 
+    box-shadow: var(--shadow-soft), 0 0 0 0 hsla(356, 75%, 75%, 0.4); 
   }
   50% { 
-    box-shadow: 0 0 0 10px hsla(158, 64%, 52%, 0); 
+    box-shadow: var(--shadow-soft), 0 0 0 8px hsla(356, 75%, 75%, 0); 
   }
 }
 
 .upload-area {
-  background: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(216, 12%, 96%));
-  border: 2px dashed hsl(158, 64%, 52%);
-  transition: all 0.3s ease;
+  background: hsl(0, 0%, 100%);
+  border: 2px dashed hsl(356, 75%, 85%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-soft);
 }
 
 .upload-area:hover {
-  border-color: hsl(158, 64%, 45%);
-  background: linear-gradient(145deg, hsl(158, 64%, 98%), hsl(216, 12%, 96%));
+  border-color: hsl(356, 75%, 75%);
+  background: hsl(356, 75%, 99%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
 }
 
 .upload-area.dragover {
-  border-color: hsl(158, 64%, 45%);
-  background: linear-gradient(145deg, hsl(158, 64%, 96%), hsl(216, 12%, 94%));
-  transform: scale(1.02);
+  border-color: hsl(356, 75%, 70%);
+  background: hsl(356, 75%, 98%);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-strong);
 }
 
 /* Dark mode neomorphic styles */
 .dark .neomorphic {
-  background: linear-gradient(145deg, hsl(215, 20%, 12%), hsl(215, 20%, 8%));
-  box-shadow: 8px 8px 16px hsl(215, 20%, 5%), -8px -8px 16px hsl(215, 20%, 15%);
+  background: hsl(215, 20%, 12%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid hsl(215, 20%, 18%);
 }
 
 .dark .neomorphic-inset {
-  background: linear-gradient(145deg, hsl(215, 20%, 8%), hsl(215, 20%, 12%));
-  box-shadow: inset 6px 6px 12px hsl(215, 20%, 5%), inset -6px -6px 12px hsl(215, 20%, 15%);
+  background: hsl(215, 20%, 8%);
+  box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 8px rgba(255, 255, 255, 0.05);
 }
 
 .dark .upload-area {
-  background: linear-gradient(145deg, hsl(215, 20%, 12%), hsl(215, 20%, 8%));
-  border: 2px dashed hsl(158, 64%, 52%);
+  background: hsl(215, 20%, 12%);
+  border: 2px dashed hsl(356, 75%, 65%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .dark .upload-area:hover {
-  border-color: hsl(158, 64%, 45%);
-  background: linear-gradient(145deg, hsl(158, 64%, 8%), hsl(215, 20%, 8%));
+  border-color: hsl(356, 75%, 70%);
+  background: hsl(356, 75%, 8%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
 .dark .glass-morphism {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
