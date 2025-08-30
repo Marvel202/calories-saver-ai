@@ -38,30 +38,31 @@ export default function Home() {
       
       <main className="relative">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex flex-col justify-center px-6 py-16 overflow-hidden">
-          {/* Background decorative elements */}
+        <section className="relative min-h-screen flex flex-col justify-center px-8 py-20 overflow-hidden">
+          {/* Enhanced Background decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/8 rounded-full blur-3xl floating-card"></div>
+            <div className="absolute -bottom-48 -left-48 w-96 h-96 bg-secondary/8 rounded-full blur-3xl floating-card" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-1/4 -right-20 w-64 h-64 bg-accent/6 rounded-full blur-2xl floating-card" style={{animationDelay: '4s'}}></div>
           </div>
           
-          <div className="relative z-10 max-w-5xl mx-auto w-full">
+          <div className="relative z-10 max-w-6xl mx-auto w-full">
             {/* Main Hero Content */}
-            <div className="text-center mb-16">
-              <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight tracking-tight">
+            <div className="text-center mb-20">
+              <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-8 leading-tight tracking-tight text-3d">
                 Smart Nutrition
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block">
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block text-embossed">
                   Analysis
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+              <p className="text-2xl md:text-3xl text-muted-foreground mb-16 max-w-4xl mx-auto leading-relaxed font-light">
                 Upload a photo of your meal and get instant macronutrient breakdown powered by AI. 
                 Track protein, carbs, and fat effortlessly.
               </p>
             </div>
 
             {/* Main Upload Card */}
-            <div className="relative mb-16">
+            <div className="relative mb-20">
               <PhotoUploadArea onAnalysisComplete={handleAnalysisComplete} />
             </div>
 
