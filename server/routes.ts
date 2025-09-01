@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Meal analysis endpoint - SIMPLIFIED VERSION
+  // Meal analysis endpoint - CORRECTED VERSION
   app.post("/api/analyze-meal", async (req, res) => {
     try {
       const { imageUrl } = req.body;
@@ -91,31 +91,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
-      // Create the accessible image URL through our app's object serving route
-      // Instead of direct storage URL, use our app's route that can access private storage
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const accessibleImageUrl = `${baseUrl}${normalizedPath}`;
+      // Use the actual Replit app URL (always HTTPS in production)
+      const appUrl = process.env.APP_URL || 'https://calorie-snap-marvel202.replit.app';
+      const accessibleImageUrl = `${appUrl}${normalizedPath}`;
 
       console.log("Creating accessible image URL:", accessibleImageUrl);
       
-      // Verify the image exists by checking our object serving route
-      const imageResponse = await fetch(accessibleImageUrl);
-      if (!imageResponse.ok) {
-        console.error("Failed to access image through app route:", imageResponse.status);
-        throw new Error("Failed to access image through app route");
+      // Optional: Verify the image exists locally first (faster)
+      try {
+        const objectFile = await objectStorageService.getObjectEntityFile(normalizedPath);
+        console.log("Image file verified in storage");
+      } catch (error) {
+        console.error("Image not found in storage:", error);
+        throw new Error("Image not found in storage");
       }
-      
-      const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-      console.log("Image verified through app route, type:", mimeType);
 
       // Call n8n webhook with JSON payload containing the accessible image URL
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
       // Send JSON with the accessible image URL
       const webhookPayload = {
-        imageUrl: accessibleImageUrl,  // Send URL that n8n can access through our app
+        imageUrl: accessibleImageUrl,  // This will be https://calorie-snap-marvel202.replit.app/objects/uploads/...
         normalizedPath: normalizedPath,
-        mimeType: mimeType,
+        mimeType: "image/jpeg", // You can hardcode this or detect it
         timestamp: new Date().toISOString()
       };
       
@@ -136,7 +134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("n8n webhook error response:", responseText);
         console.error("Response status:", n8nResponse.status);
         
-        // Handle n8n test mode specifically
         if (responseText.includes("test mode") || responseText.includes("Execute workflow")) {
           throw new Error("n8n webhook is in test mode. Please click 'Execute workflow' in n8n canvas and try again.");
         }

@@ -1,0 +1,89 @@
+// Meal analysis endpoint - CORRECTED VERSION
+app.post("/api/analyze-meal", async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ error: "Image URL is required" });
+    }
+
+    // Normalize the object path for storage
+    const objectStorageService = new ObjectStorageService();
+    const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
+
+    // Use the actual Replit app URL (always HTTPS in production)
+    const appUrl = process.env.APP_URL || 'https://calorie-snap-marvel202.replit.app';
+    const accessibleImageUrl = `${appUrl}${normalizedPath}`;
+
+    console.log("Creating accessible image URL:", accessibleImageUrl);
+    
+    // Optional: Verify the image exists locally first (faster)
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(normalizedPath);
+      console.log("Image file verified in storage");
+    } catch (error) {
+      console.error("Image not found in storage:", error);
+      throw new Error("Image not found in storage");
+    }
+
+    // Call n8n webhook with JSON payload containing the accessible image URL
+    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+    
+    // Send JSON with the accessible image URL
+    const webhookPayload = {
+      imageUrl: accessibleImageUrl,  // This will be https://calorie-snap-marvel202.replit.app/objects/uploads/...
+      normalizedPath: normalizedPath,
+      mimeType: "image/jpeg", // You can hardcode this or detect it
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log("Sending to n8n webhook:", n8nWebhookUrl);
+    console.log("Payload:", JSON.stringify(webhookPayload, null, 2));
+    
+    const n8nResponse = await fetch(n8nWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
+      body: JSON.stringify(webhookPayload),
+    });
+
+    if (!n8nResponse.ok) {
+      const responseText = await n8nResponse.text();
+      console.error("n8n webhook error response:", responseText);
+      console.error("Response status:", n8nResponse.status);
+      
+      if (responseText.includes("test mode") || responseText.includes("Execute workflow")) {
+        throw new Error("n8n webhook is in test mode. Please click 'Execute workflow' in n8n canvas and try again.");
+      }
+      
+      throw new Error(`n8n workflow failed: ${n8nResponse.status} - ${responseText}`);
+    }
+
+    const n8nData = await n8nResponse.json();
+    console.log("n8n response received:", n8nData);
+    
+    // Validate the nutrition data from n8n
+    const nutrition = nutritionDataSchema.parse(n8nData.nutrition || n8nData);
+    
+    // Store the analysis in memory
+    const analysis = await storage.createMealAnalysis({
+      imageUrl: normalizedPath,
+      nutrition,
+    });
+
+    res.json({
+      analysisId: analysis.id,
+      nutrition,
+      imageUrl: normalizedPath,
+    });
+
+  } catch (error) {
+    console.error("Error analyzing meal:", error);
+    res.status(500).json({ 
+      error: "Failed to analyze meal",
+      details: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+});
