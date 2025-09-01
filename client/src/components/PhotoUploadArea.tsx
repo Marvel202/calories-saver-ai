@@ -46,7 +46,9 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   });
 
   const handleGetUploadParameters = async () => {
-    console.log("Requesting upload parameters...");
+    console.log("🌐 BROWSER: Requesting upload parameters...");
+    const startTime = Date.now();
+    
     try {
       // Make request directly with fetch to avoid apiRequest wrapper issues
       const res = await fetch("/api/objects/upload", {
@@ -57,24 +59,29 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
         body: JSON.stringify({}),
       });
       
-      console.log("Upload params response status:", res.status);
-      console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+      const elapsed = Date.now() - startTime;
+      console.log(`🌐 BROWSER: Upload params response status: ${res.status} (${elapsed}ms)`);
+      console.log("🌐 BROWSER: Response headers:", Object.fromEntries(res.headers.entries()));
       
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("Upload params error response:", errorText);
+        console.error("🌐 BROWSER: Upload params error response:", errorText);
         throw new Error(`HTTP ${res.status}: ${errorText}`);
       }
       
       const data = await res.json();
-      console.log("Upload params received:", { url: data.uploadURL?.substring(0, 100) + "..." });
+      console.log("🌐 BROWSER: Upload params received:", { 
+        url: data.uploadURL?.substring(0, 100) + "...",
+        fullResponse: data 
+      });
       
       return {
         method: "PUT" as const,
         url: data.uploadURL,
       };
     } catch (error) {
-      console.error("Failed to get upload parameters:", error);
+      const elapsed = Date.now() - startTime;
+      console.error(`🌐 BROWSER: Failed to get upload parameters (${elapsed}ms):`, error);
       throw error;
     }
   };

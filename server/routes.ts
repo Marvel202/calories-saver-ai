@@ -22,12 +22,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/objects/upload", async (req, res) => {
-    console.log("🔥 BROWSER Upload URL request received:", {
+    const isBrowser = req.headers['user-agent']?.includes('Mozilla') || req.headers['user-agent']?.includes('Chrome');
+    const logPrefix = isBrowser ? "🌐 BROWSER" : "📡 CURL";
+    
+    console.log(`${logPrefix} Upload URL request received:`, {
       method: req.method,
       url: req.url,
       userAgent: req.headers['user-agent'],
       contentType: req.headers['content-type'],
-      body: req.body
+      body: req.body,
+      timestamp: new Date().toISOString()
     });
     
     // Add CORS headers explicitly  
@@ -37,14 +41,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const objectStorageService = new ObjectStorageService();
     try {
-      console.log("🔥 BROWSER Attempting to generate upload URL...");
+      console.log(`${logPrefix} Attempting to generate upload URL...`);
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      console.log("🔥 BROWSER Upload URL generated successfully:", uploadURL.substring(0, 100) + "...");
+      console.log(`${logPrefix} Upload URL generated successfully:`, uploadURL.substring(0, 100) + "...");
       res.json({ uploadURL });
     } catch (error) {
-      console.error("🔥 BROWSER Error generating upload URL:", error);
-      console.error("🔥 BROWSER Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ error: "Failed to generate upload URL", details: error instanceof Error ? error.message : 'Unknown error' });
+      console.error(`${logPrefix} Error generating upload URL:`, error);
+      console.error(`${logPrefix} Error details:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        name: error instanceof Error ? error.name : 'Unknown',
+        timestamp: new Date().toISOString()
+      });
+      res.status(500).json({ 
+        error: "Failed to generate upload URL", 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
     }
   });
 
