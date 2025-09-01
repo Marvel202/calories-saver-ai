@@ -114,18 +114,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
         return;
       }
 
-      // Create a mock Uppy result to trigger the same upload flow as ObjectUploader
-      const mockUppyResult = {
-        successful: [{
-          data: file,
-          name: file.name,
-          type: file.type,
-          uploadURL: '' // Will be set after upload
-        }],
-        failed: []
-      };
-
-      // Start the upload process
+      // Start the upload process using the same approach as ObjectUploader
       setIsAnalyzing(true);
       setProgress(0);
       
@@ -139,42 +128,36 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
         });
       }, 200);
 
-      // Use the existing upload infrastructure
+      // Use a direct upload approach similar to what Uppy does internally
       handleGetUploadParameters()
         .then(uploadParams => {
-          console.log('Camera upload: Got upload params:', { url: uploadParams.url.substring(0, 100) + '...' });
+          console.log('Camera upload: Got upload params');
           
-          // Store the original signed URL to construct final URL
-          const signedURL = uploadParams.url;
-          
-          return fetch(signedURL, {
+          return fetch(uploadParams.url, {
             method: uploadParams.method,
             body: file,
           }).then(response => {
             console.log('Camera upload: Response status:', response.status);
             if (!response.ok) {
-              throw new Error(`Upload failed with status: ${response.status} - ${response.statusText}`);
+              throw new Error(`Upload failed with status: ${response.status}`);
             }
-            // Construct the final object URL by removing query params from signed URL
-            const finalObjectURL = signedURL.split('?')[0];
-            console.log('Camera upload: Final object URL:', finalObjectURL);
-            return finalObjectURL;
+            
+            // Get the final URL by removing query parameters
+            const finalURL = uploadParams.url.split('?')[0];
+            console.log('Camera upload: Success, final URL:', finalURL);
+            
+            // Clear progress interval
+            clearInterval(progressInterval);
+            
+            // Directly trigger analysis like ObjectUploader does
+            analyzeImageMutation.mutate(finalURL);
+            
+            return finalURL;
           });
-        })
-        .then(finalObjectURL => {
-          console.log('Camera upload: Success, triggering completion with URL:', finalObjectURL);
-          mockUppyResult.successful[0].uploadURL = finalObjectURL;
-          
-          // Trigger the same completion handler as ObjectUploader
-          handleUploadComplete(mockUppyResult as any);
         })
         .catch(error => {
           console.error('Camera upload error:', error);
-          console.error('Error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-          });
+          clearInterval(progressInterval);
           setIsAnalyzing(false);
           setProgress(0);
           toast({
