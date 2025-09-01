@@ -77,7 +77,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
     }
   }, [analyzeImageMutation]);
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -96,6 +96,50 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
           variant: "destructive",
         });
         return;
+      }
+
+      // Upload the file directly
+      try {
+        const uploadParams = await handleGetUploadParameters();
+        
+        setIsAnalyzing(true);
+        setProgress(0);
+        
+        // Upload file to object storage
+        const uploadResponse = await fetch(uploadParams.url, {
+          method: uploadParams.method,
+          body: file,
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Upload failed');
+        }
+
+        // Trigger analysis with upload URL
+        const progressInterval = setInterval(() => {
+          setProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + Math.random() * 30;
+          });
+        }, 200);
+
+        analyzeImageMutation.mutate(uploadParams.url);
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload image. Please try again.",
+          variant: "destructive",
+        });
+        setIsAnalyzing(false);
+        setProgress(0);
       }
     }
   };
