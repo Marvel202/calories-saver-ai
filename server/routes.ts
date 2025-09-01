@@ -6,6 +6,23 @@ import { insertMealAnalysisSchema, nutritionDataSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Add debugging middleware to track API route hits
+  app.use('/api/*', (req, res, next) => {
+    const userAgent = req.headers['user-agent']?.substring(0, 50) || 'Unknown';
+    console.log(`🔍 API Route intercepted: ${req.method} ${req.url} from ${userAgent}`);
+    next();
+  });
+
+  // Handle CORS preflight requests for API endpoints
+  app.options('/api/*', (req, res) => {
+    console.log(`🔧 CORS preflight for ${req.url}`);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendStatus(200);
+  });
+
   // Object storage routes for public file uploading
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = new ObjectStorageService();
