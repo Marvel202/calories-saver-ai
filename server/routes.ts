@@ -91,42 +91,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
-      // Fetch the image binary data for LLM analysis
-      console.log("Fetching image binary data for LLM:", imageUrl);
-      
-      // Create the full storage URL
+      // Create the full accessible storage URL for n8n
       const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : 
         `https://storage.googleapis.com/replit-objstore-38096412-da93-467f-a5b2-946fefe42efe/.private${imageUrl}`;
 
-      // Fetch the image binary data
-      const imageResponse = await fetch(fullImageUrl);
-      if (!imageResponse.ok) {
-        console.error("Failed to fetch image from storage:", imageResponse.status);
-        throw new Error("Failed to fetch image from storage");
-      }
-
-      // Convert image to base64 for LLM
-      const imageBuffer = await imageResponse.arrayBuffer();
-      const imageBase64 = Buffer.from(imageBuffer).toString('base64');
-      const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-
-      console.log(`Image data prepared for LLM (${imageBuffer.byteLength} bytes, ${mimeType})`);
+      console.log("Sending accessible image URL to n8n:", fullImageUrl);
 
       // Call n8n workflow for meal analysis
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
+      // Simplified webhook payload with accessible URL for n8n
       const webhookPayload = {
-        imageUrl: normalizedPath,
-        imageData: `data:${mimeType};base64,${imageBase64}`,
-        imageBinary: imageBase64,
-        mimeType,
-        timestamp: new Date().toISOString(),
-        originalUrl: fullImageUrl
+        imageUrl: fullImageUrl, // Send the full accessible URL
+        metadata: {
+          normalizedPath,
+          timestamp: new Date().toISOString()
+        }
       };
       
       console.log("Sending to n8n webhook:", n8nWebhookUrl);
-      console.log("Payload keys:", Object.keys(webhookPayload));
-      console.log("Image data size:", imageBase64.length, "characters");
+      console.log("Payload:", JSON.stringify(webhookPayload, null, 2));
       
       const n8nResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
