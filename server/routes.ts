@@ -46,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
       // Call n8n workflow for meal analysis
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://example-n8n-workflow.com/webhook/analyze-meal";
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92";
       
       const n8nResponse = await fetch(n8nWebhookUrl, {
         method: "POST",

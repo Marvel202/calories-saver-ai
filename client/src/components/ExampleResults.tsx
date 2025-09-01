@@ -13,7 +13,7 @@ export function ExampleResults() {
       }
     },
     {
-      image: "/attached_assets/pasta mariana_1756729870118.jpg",
+      image: "/attached_assets/pasta mariana_1756734084468.jpg",
       title: "Pasta Marinara with Shrimp", 
       alt: "Pasta marinara with shrimp in white bowl",
       nutrition: {

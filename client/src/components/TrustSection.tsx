@@ -41,9 +41,9 @@ export function TrustSection() {
                 const Icon = feature.icon;
                 return (
                   <div key={index} className="flex items-center space-x-6" data-testid={`feature-${index + 1}`}>
-                    <div className={`w-16 h-16 ${feature.color} rounded-3xl flex items-center justify-center elevation-2`}>
+                    <button className={`w-16 h-16 ${feature.color} rounded-3xl flex items-center justify-center elevation-2 hover-lift tactile-button hover:elevation-3 transition-all duration-200`}>
                       <Icon size={32} />
-                    </div>
+                    </button>
                     <div>
                       <h4 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h4>
                       <p className="text-gray-700 font-medium">{feature.description}</p>

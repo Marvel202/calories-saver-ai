@@ -156,10 +156,10 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
             <div className="flex flex-col sm:flex-row gap-8 justify-center">
               <Button 
                 onClick={openCamera}
-                className="tactile-button px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 pulse-primary"
+                className="tactile-button px-10 py-5 bg-primary text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 pulse-primary"
                 data-testid="button-camera"
               >
-                <Camera size={28} />
+                <Camera size={28} className="text-gray-900" />
                 <span>Take Photo</span>
               </Button>
               
@@ -168,7 +168,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
                 maxFileSize={10485760}
                 onGetUploadParameters={handleGetUploadParameters}
                 onComplete={handleUploadComplete}
-                buttonClassName="tactile-button px-10 py-5 text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4"
+                buttonClassName="tactile-button px-10 py-5 bg-gray-100 text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4"
               >
                 <Images size={28} />
                 <span>From Gallery</span>

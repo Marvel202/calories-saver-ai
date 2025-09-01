@@ -242,7 +242,32 @@
 
 /* Clean, accessible interface with no unnecessary animations */
 
-/* Removed duplicate tactile-button styles - using elevation system */
+/* Tactile button implementation using elevation system */
+.tactile-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.tactile-button:hover {
+  transform: translateY(-2px);
+}
+
+.tactile-button:active {
+  transform: translateY(1px) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tactile-button,
+  .hover-lift {
+    transform: none !important;
+    transition: none !important;
+  }
+}
 
 /* Dark mode neomorphic styles */
 .dark .neomorphic {
