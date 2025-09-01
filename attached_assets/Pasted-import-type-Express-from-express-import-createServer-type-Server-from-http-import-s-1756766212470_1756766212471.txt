@@ -5,80 +5,9 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { insertMealAnalysisSchema, nutritionDataSchema } from "@shared/schema";
 import { z } from "zod";
 import FormData from "form-data";
-import fetch from "node-fetch";
+import fetch from "node-fetch"; // Add this import
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  
-  // Add debugging middleware to track API route hits
-  app.use('/api/*', (req, res, next) => {
-    const userAgent = req.headers['user-agent']?.substring(0, 50) || 'Unknown';
-    console.log(`🔍 API Route intercepted: ${req.method} ${req.url} from ${userAgent}`);
-    next();
-  });
-
-  // Handle CORS preflight requests for API endpoints
-  app.options('/api/*', (req, res) => {
-    console.log(`🔧 CORS preflight for ${req.url}`);
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.sendStatus(200);
-  });
-
-  // Object storage routes for public file uploading
-  app.get("/objects/:objectPath(*)", async (req, res) => {
-    const objectStorageService = new ObjectStorageService();
-    try {
-      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
-      objectStorageService.downloadObject(objectFile, res);
-    } catch (error) {
-      console.error("Error accessing object:", error);
-      if (error instanceof ObjectNotFoundError) {
-        return res.sendStatus(404);
-      }
-      return res.sendStatus(500);
-    }
-  });
-
-  app.post("/api/objects/upload", async (req, res) => {
-    const isBrowser = req.headers['user-agent']?.includes('Mozilla') || req.headers['user-agent']?.includes('Chrome');
-    const logPrefix = isBrowser ? "🌐 BROWSER" : "📡 CURL";
-    
-    console.log(`${logPrefix} Upload URL request received:`, {
-      method: req.method,
-      url: req.url,
-      userAgent: req.headers['user-agent'],
-      contentType: req.headers['content-type'],
-      body: req.body,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Add CORS headers explicitly  
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    
-    const objectStorageService = new ObjectStorageService();
-    try {
-      console.log(`${logPrefix} Attempting to generate upload URL...`);
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      console.log(`${logPrefix} Upload URL generated successfully:`, uploadURL.substring(0, 100) + "...");
-      res.json({ uploadURL });
-    } catch (error) {
-      console.error(`${logPrefix} Error generating upload URL:`, error);
-      console.error(`${logPrefix} Error details:`, {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : 'No stack trace',
-        name: error instanceof Error ? error.name : 'Unknown',
-        timestamp: new Date().toISOString()
-      });
-      res.status(500).json({ 
-        error: "Failed to generate upload URL", 
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
+// ... rest of your code ...
 
   // Meal analysis endpoint
   app.post("/api/analyze-meal", async (req, res) => {
@@ -147,7 +76,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("n8n webhook error response:", responseText);
         console.error("Response status:", n8nResponse.status);
         
-        // Handle n8n test mode specifically
         if (responseText.includes("test mode") || responseText.includes("Execute workflow")) {
           throw new Error("n8n webhook is in test mode. Please click 'Execute workflow' in n8n canvas and try again.");
         }
@@ -181,39 +109,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
-  // Feedback endpoint
-  app.post("/api/feedback", async (req, res) => {
-    try {
-      const { imageUrl, rating, nutrition } = req.body;
-      
-      if (!imageUrl || !rating || !nutrition) {
-        return res.status(400).json({ error: "Missing required fields" });
-      }
-
-      if (rating < 1 || rating > 4) {
-        return res.status(400).json({ error: "Rating must be between 1 and 4" });
-      }
-
-      // Find the analysis by imageUrl (in a real app, you'd pass the analysisId)
-      // For now, we'll create a feedback entry
-      const feedbackAnalysis = await storage.createMealAnalysis({
-        imageUrl,
-        nutrition,
-        feedback: rating,
-      });
-
-      res.json({ 
-        success: true,
-        feedbackId: feedbackAnalysis.id 
-      });
-
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      res.status(500).json({ error: "Failed to submit feedback" });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
-}
