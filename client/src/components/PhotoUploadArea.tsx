@@ -137,7 +137,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   };
 
   return (
-    <div className="neomorphic-floating rounded-3xl p-16 md:p-20 hover-lift floating-card">
+    <div className="elevation-3 rounded-3xl p-16 md:p-20 hover-lift">
       <div 
         className={`upload-area rounded-3xl p-16 text-center min-h-96 flex flex-col justify-center items-center cursor-pointer ${dragOver ? 'dragover' : ''}`}
         onDragOver={handleDragOver}
@@ -147,20 +147,20 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       >
         {!isAnalyzing ? (
           <div data-testid="upload-content">
-            <div className="w-28 h-28 bg-primary/15 rounded-3xl flex items-center justify-center mb-8 mx-auto neomorphic hover-lift">
+            <div className="w-28 h-28 bg-primary/20 rounded-3xl flex items-center justify-center mb-8 mx-auto elevation-2 hover-lift">
               <Camera className="text-primary text-3xl" size={48} />
             </div>
-            <h3 className="text-3xl font-bold text-foreground mb-4 text-3d">Upload Your Meal</h3>
-            <p className="text-muted-foreground mb-12 text-xl font-light">Take a photo or upload from gallery</p>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Upload Your Meal</h3>
+            <p className="text-gray-700 mb-12 text-xl font-medium">Take a photo or upload from gallery</p>
             
             <div className="flex flex-col sm:flex-row gap-8 justify-center">
               <Button 
                 onClick={openCamera}
-                className="tactile-button px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 pulse-glow button-press"
+                className="tactile-button px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 pulse-primary"
                 data-testid="button-camera"
               >
                 <Camera size={28} />
-                <span className="text-embossed">Take Photo</span>
+                <span>Take Photo</span>
               </Button>
               
               <ObjectUploader
@@ -168,20 +168,20 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
                 maxFileSize={10485760}
                 onGetUploadParameters={handleGetUploadParameters}
                 onComplete={handleUploadComplete}
-                buttonClassName="tactile-button px-10 py-5 text-foreground rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 button-press"
+                buttonClassName="tactile-button px-10 py-5 text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4"
               >
                 <Images size={28} />
-                <span className="text-embossed">From Gallery</span>
+                <span>From Gallery</span>
               </ObjectUploader>
             </div>
           </div>
         ) : (
           <div data-testid="loading-state">
-            <div className="w-24 h-24 border-4 border-primary/20 border-t-primary rounded-full animate-loading-spin mx-auto mb-8 neomorphic"></div>
-            <h3 className="text-3xl font-bold text-foreground mb-4 text-3d">Analyzing Your Meal</h3>
-            <p className="text-muted-foreground mb-8 text-xl font-light">Our AI is processing your image...</p>
+            <div className="w-24 h-24 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-8 elevation-1"></div>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Analyzing Your Meal</h3>
+            <p className="text-gray-700 mb-8 text-xl font-medium">Our AI is processing your image...</p>
             <div className="w-full max-w-xl mx-auto">
-              <Progress value={progress} className="h-4 neomorphic-inset" data-testid="progress-analysis" />
+              <Progress value={progress} className="h-4 elevation-inset" data-testid="progress-analysis" />
             </div>
           </div>
         )}

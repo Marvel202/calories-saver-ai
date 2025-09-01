@@ -40,16 +40,22 @@
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 16px;
-  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
-  --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-  --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-inset: inset 3px 3px 8px rgba(0, 0, 0, 0.1), inset -3px -3px 8px rgba(255, 255, 255, 0.9);
-  --shadow-raised: 0 6px 20px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.08);
-  --shadow-pressed: inset 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 -1px 0 rgba(255, 255, 255, 0.5);
-  --gradient-light: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(0, 0%, 96%));
-  --gradient-raised: linear-gradient(145deg, hsl(0, 0%, 98%), hsl(0, 0%, 94%));
-  --gradient-pressed: linear-gradient(145deg, hsl(0, 0%, 94%), hsl(0, 0%, 98%));
+  /* Tokenized Elevation Scale - 6 Discrete Levels */
+  --elevation-0: none; /* Flat/pressed */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.10);
+  --elevation-3: 0 6px 12px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.10);
+  --elevation-4: 0 12px 24px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.10);
+  --elevation-5: 0 24px 48px rgba(0, 0, 0, 0.18), 0 16px 32px rgba(0, 0, 0, 0.12);
+  
+  /* Inset shadows for pressed/recessed elements */
+  --elevation-inset-1: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(255, 255, 255, 0.5);
+  --elevation-inset-2: inset 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  
+  /* Accessible gradients - higher contrast */
+  --surface-raised: linear-gradient(145deg, hsl(0, 0%, 98%), hsl(0, 0%, 92%));
+  --surface-flat: hsl(0, 0%, 95%);
+  --surface-pressed: linear-gradient(145deg, hsl(0, 0%, 90%), hsl(0, 0%, 96%));
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 }
@@ -94,180 +100,149 @@
   }
 }
 
-/* Advanced 3D Neomorphic Styles */
-.neomorphic {
-  background: var(--gradient-light);
-  box-shadow: var(--shadow-raised);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  position: relative;
-  overflow: hidden;
+/* Accessible Neomorphic Elevation System */
+.elevation-1 {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-1);
+  border: 1px solid hsl(0, 0%, 85%);
 }
 
-.neomorphic::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-  pointer-events: none;
+.elevation-2 {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+  border: 1px solid hsl(0, 0%, 85%);
 }
 
-.neomorphic-inset {
-  background: var(--gradient-pressed);
-  box-shadow: var(--shadow-inset);
-  border: 1px solid hsl(0, 0%, 90%);
+.elevation-3 {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-3);
+  border: 1px solid hsl(0, 0%, 85%);
 }
 
-.neomorphic-floating {
-  background: var(--gradient-light);
-  box-shadow: var(--shadow-floating);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+.elevation-4 {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-4);
+  border: 1px solid hsl(0, 0%, 85%);
 }
 
-.glass-morphism {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+.elevation-5 {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-5);
+  border: 1px solid hsl(0, 0%, 85%);
 }
 
+.elevation-inset {
+  background: var(--surface-pressed);
+  box-shadow: var(--elevation-inset-1);
+  border: 1px solid hsl(0, 0%, 80%);
+}
+
+.elevation-pressed {
+  background: var(--surface-pressed);
+  box-shadow: var(--elevation-inset-2);
+  border: 1px solid hsl(0, 0%, 75%);
+}
+
+/* Replace glassmorphism with opaque accessible cards */
+.surface-translucent {
+  background: hsl(0, 0%, 97%);
+  border: 1px solid hsl(0, 0%, 85%);
+  box-shadow: var(--elevation-2);
+}
+
+/* Reduced Motion Accessible Interactions */
 .hover-lift {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform-style: preserve-3d;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
-  transform: translateY(-6px) translateZ(20px);
-  box-shadow: var(--shadow-floating);
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-4);
 }
 
 .hover-lift:active {
-  transform: translateY(-2px) translateZ(10px);
+  transform: translateY(0px);
   transition: all 0.1s ease;
 }
 
-.button-press {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
-}
-
-.button-press:hover {
-  transform: translateY(-3px) translateZ(15px);
-  box-shadow: var(--shadow-medium);
-}
-
-.button-press:active {
-  transform: translateY(1px) translateZ(5px);
-  box-shadow: var(--shadow-pressed);
-  background: var(--gradient-pressed);
-}
-
-.pulse-glow {
-  animation: pulse-glow 4s infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { 
-    box-shadow: var(--shadow-raised), 0 0 0 0 hsla(356, 75%, 75%, 0.6); 
-  }
-  50% { 
-    box-shadow: var(--shadow-floating), 0 0 0 12px hsla(356, 75%, 75%, 0); 
-  }
-}
-
-.upload-area {
-  background: var(--gradient-light);
-  border: 3px dashed hsl(356, 75%, 80%);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: var(--shadow-inset);
-  position: relative;
-  overflow: hidden;
-}
-
-.upload-area::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent);
-  pointer-events: none;
-}
-
-.upload-area:hover {
-  border-color: hsl(356, 75%, 70%);
-  background: linear-gradient(145deg, hsl(356, 75%, 99%), hsl(356, 75%, 96%));
-  transform: translateY(-4px) translateZ(20px);
-  box-shadow: var(--shadow-medium);
-}
-
-.upload-area.dragover {
-  border-color: hsl(356, 75%, 65%);
-  background: linear-gradient(145deg, hsl(356, 75%, 97%), hsl(356, 75%, 94%));
-  transform: translateY(-8px) translateZ(30px) scale(1.02);
-  box-shadow: var(--shadow-floating);
-}
-
-.text-3d {
-  text-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.text-embossed {
-  text-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.8),
-    0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.floating-card {
-  animation: floating 6s ease-in-out infinite;
-  transform-style: preserve-3d;
-}
-
-@keyframes floating {
-  0%, 100% { 
-    transform: translateY(0px) rotateX(0deg);
-  }
-  50% { 
-    transform: translateY(-10px) rotateX(2deg);
-  }
-}
-
 .tactile-button {
-  background: var(--gradient-raised);
-  box-shadow: var(--shadow-raised);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
-  position: relative;
-  overflow: hidden;
-}
-
-.tactile-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-  pointer-events: none;
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+  border: 1px solid hsl(0, 0%, 75%);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tactile-button:hover {
-  transform: translateY(-2px) translateZ(10px);
-  box-shadow: var(--shadow-medium);
+  box-shadow: var(--elevation-3);
 }
 
 .tactile-button:active {
-  transform: translateY(1px) translateZ(2px);
-  box-shadow: var(--shadow-pressed);
-  background: var(--gradient-pressed);
+  box-shadow: var(--elevation-inset-1);
+  background: var(--surface-pressed);
+  transform: translateY(1px);
 }
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift,
+  .tactile-button,
+  .floating-card,
+  .pulse-glow {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .hover-lift:hover,
+  .tactile-button:hover {
+    transform: none !important;
+  }
+}
+
+/* Accessible Upload Area */
+.upload-area {
+  background: var(--surface-flat);
+  border: 2px dashed hsl(356, 75%, 70%);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--elevation-inset-1);
+}
+
+.upload-area:hover {
+  border-color: hsl(356, 75%, 60%);
+  background: hsl(356, 75%, 98%);
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-2);
+}
+
+.upload-area.dragover {
+  border-color: hsl(356, 75%, 50%);
+  background: hsl(356, 75%, 96%);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--elevation-3);
+}
+
+/* Simplified pulse for primary CTA only */
+.pulse-primary {
+  animation: pulse-primary 3s infinite;
+}
+
+@keyframes pulse-primary {
+  0%, 100% { 
+    box-shadow: var(--elevation-2), 0 0 0 0 hsla(356, 75%, 75%, 0.4); 
+  }
+  50% { 
+    box-shadow: var(--elevation-3), 0 0 0 8px hsla(356, 75%, 75%, 0); 
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-primary {
+    animation: none !important;
+  }
+}
+
+/* Clean, accessible interface with no unnecessary animations */
+
+/* Removed duplicate tactile-button styles - using elevation system */
 
 /* Dark mode neomorphic styles */
 .dark .neomorphic {
@@ -300,63 +275,4 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Advanced 3D Loading Animation */
-@keyframes loading-spin-3d {
-  0% { 
-    transform: rotate(0deg) rotateY(0deg); 
-  }
-  50% { 
-    transform: rotate(180deg) rotateY(180deg); 
-  }
-  100% { 
-    transform: rotate(360deg) rotateY(360deg); 
-  }
-}
-
-.animate-loading-spin {
-  animation: loading-spin-3d 2s linear infinite;
-  transform-style: preserve-3d;
-}
-
-/* Layered depth effect */
-.depth-layer-1 {
-  transform: translateZ(10px);
-}
-
-.depth-layer-2 {
-  transform: translateZ(20px);
-}
-
-.depth-layer-3 {
-  transform: translateZ(30px);
-}
-
-/* Enhanced tactile feedback */
-.tactile-feedback:active {
-  transform: translateY(2px) translateZ(-5px) scale(0.98);
-  transition: all 0.1s ease;
-}
-
-/* Perspective container for 3D effects */
-.perspective-container {
-  perspective: 1000px;
-  transform-style: preserve-3d;
-}
-
-/* Enhanced floating effect with rotation */
-@keyframes enhanced-floating {
-  0%, 100% { 
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
-  }
-  33% { 
-    transform: translateY(-8px) rotateX(1deg) rotateY(-1deg);
-  }
-  66% { 
-    transform: translateY(-4px) rotateX(-1deg) rotateY(1deg);
-  }
-}
-
-.enhanced-floating {
-  animation: enhanced-floating 8s ease-in-out infinite;
-  transform-style: preserve-3d;
-}
+/* Simplified, accessible animations */

@@ -38,31 +38,24 @@ export default function Home() {
       
       <main className="relative">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex flex-col justify-center px-8 py-20 overflow-hidden">
-          {/* Enhanced Background decorative elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/8 rounded-full blur-3xl floating-card"></div>
-            <div className="absolute -bottom-48 -left-48 w-96 h-96 bg-secondary/8 rounded-full blur-3xl floating-card" style={{animationDelay: '2s'}}></div>
-            <div className="absolute top-1/4 -right-20 w-64 h-64 bg-accent/6 rounded-full blur-2xl floating-card" style={{animationDelay: '4s'}}></div>
-          </div>
+        <section className="relative min-h-screen flex flex-col justify-center px-6 py-16 overflow-hidden">
           
-          <div className="relative z-10 max-w-6xl mx-auto w-full">
+          <div className="max-w-6xl mx-auto w-full">
             {/* Main Hero Content */}
-            <div className="text-center mb-20">
-              <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-8 leading-tight tracking-tight text-3d">
+            <div className="text-center mb-16">
+              <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
                 Smart Nutrition
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block text-embossed">
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent block">
                   Analysis
                 </span>
               </h1>
-              <p className="text-2xl md:text-3xl text-muted-foreground mb-16 max-w-4xl mx-auto leading-relaxed font-light">
-                Upload a photo of your meal and get instant macronutrient breakdown powered by AI. 
-                Track protein, carbs, and fat effortlessly.
+              <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
+                Upload a photo of your meal and get instant macronutrient breakdown powered by AI in <a href="#methodology" className="text-primary underline hover:text-primary/80">under 3 seconds</a>. Track protein, carbs, and fat effortlessly.
               </p>
             </div>
 
             {/* Main Upload Card */}
-            <div className="relative mb-20">
+            <div className="relative mb-16">
               <PhotoUploadArea onAnalysisComplete={handleAnalysisComplete} />
             </div>
 
