@@ -46,21 +46,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
       // Call n8n workflow for meal analysis
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92";
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      const n8nResponse = await fetch(n8nWebhookUrl, {
-        method: "POST",
+      const webhookPayload = {
+        imageUrl: normalizedPath,
+        timestamp: new Date().toISOString(),
+        originalUrl: imageUrl
+      };
+      
+      console.log("Sending to n8n webhook:", n8nWebhookUrl);
+      console.log("Payload:", JSON.stringify(webhookPayload, null, 2));
+      
+      // Create URL with query parameters for GET request
+      const url = new URL(n8nWebhookUrl);
+      url.searchParams.set('imageUrl', webhookPayload.imageUrl);
+      url.searchParams.set('timestamp', webhookPayload.timestamp);
+      url.searchParams.set('originalUrl', webhookPayload.originalUrl);
+      
+      const n8nResponse = await fetch(url.toString(), {
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
         },
-        body: JSON.stringify({
-          imageUrl: normalizedPath,
-          timestamp: new Date().toISOString(),
-        }),
       });
 
       if (!n8nResponse.ok) {
-        throw new Error(`n8n workflow failed: ${n8nResponse.status}`);
+        const responseText = await n8nResponse.text();
+        console.error("n8n webhook error response:", responseText);
+        console.error("Response status:", n8nResponse.status);
+        
+        // Handle n8n test mode specifically
+        if (responseText.includes("test mode") || responseText.includes("Execute workflow")) {
+          throw new Error("n8n webhook is in test mode. Please click 'Execute workflow' in n8n canvas and try again.");
+        }
+        
+        throw new Error(`n8n workflow failed: ${n8nResponse.status} - ${responseText}`);
       }
 
       const n8nData = await n8nResponse.json();
