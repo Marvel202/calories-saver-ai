@@ -91,28 +91,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
-      // Create the full storage URL
-      const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : 
-        `https://storage.googleapis.com/replit-objstore-38096412-da93-467f-a5b2-946fefe42efe/.private${imageUrl}`;
+      // Create the accessible image URL through our app's object serving route
+      // Instead of direct storage URL, use our app's route that can access private storage
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const accessibleImageUrl = `${baseUrl}${normalizedPath}`;
 
-      console.log("Checking if image exists at:", fullImageUrl);
+      console.log("Creating accessible image URL:", accessibleImageUrl);
       
-      // Verify the image exists
-      const imageResponse = await fetch(fullImageUrl);
+      // Verify the image exists by checking our object serving route
+      const imageResponse = await fetch(accessibleImageUrl);
       if (!imageResponse.ok) {
-        console.error("Failed to fetch image from storage:", imageResponse.status);
-        throw new Error("Failed to fetch image from storage");
+        console.error("Failed to access image through app route:", imageResponse.status);
+        throw new Error("Failed to access image through app route");
       }
       
       const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-      console.log("Image verified, type:", mimeType);
+      console.log("Image verified through app route, type:", mimeType);
 
-      // Call n8n webhook with JSON payload containing the image URL
+      // Call n8n webhook with JSON payload containing the accessible image URL
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      // Send JSON with the image URL
+      // Send JSON with the accessible image URL
       const webhookPayload = {
-        imageUrl: fullImageUrl,  // Send the full URL that Mistral can access
+        imageUrl: accessibleImageUrl,  // Send URL that n8n can access through our app
         normalizedPath: normalizedPath,
         mimeType: mimeType,
         timestamp: new Date().toISOString()
