@@ -126,6 +126,8 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       // Use the existing upload infrastructure
       handleGetUploadParameters()
         .then(uploadParams => {
+          console.log('Camera upload: Got upload params:', { url: uploadParams.url.substring(0, 100) + '...' });
+          
           // Store the original signed URL to construct final URL
           const signedURL = uploadParams.url;
           
@@ -133,27 +135,35 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
             method: uploadParams.method,
             body: file,
           }).then(response => {
+            console.log('Camera upload: Response status:', response.status);
             if (!response.ok) {
-              throw new Error(`Upload failed with status: ${response.status}`);
+              throw new Error(`Upload failed with status: ${response.status} - ${response.statusText}`);
             }
             // Construct the final object URL by removing query params from signed URL
             const finalObjectURL = signedURL.split('?')[0];
+            console.log('Camera upload: Final object URL:', finalObjectURL);
             return finalObjectURL;
           });
         })
         .then(finalObjectURL => {
+          console.log('Camera upload: Success, triggering completion with URL:', finalObjectURL);
           mockUppyResult.successful[0].uploadURL = finalObjectURL;
           
           // Trigger the same completion handler as ObjectUploader
           handleUploadComplete(mockUppyResult as any);
         })
         .catch(error => {
-          console.error('Upload error:', error);
+          console.error('Camera upload error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          });
           setIsAnalyzing(false);
           setProgress(0);
           toast({
             title: "Upload Failed",
-            description: "Failed to upload image. Please try again.",
+            description: `Failed to upload image: ${error.message}`,
             variant: "destructive",
           });
         });
