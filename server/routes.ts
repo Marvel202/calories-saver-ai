@@ -22,12 +22,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/objects/upload", async (req, res) => {
+    console.log("Upload URL request received:", {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body
+    });
+    
     const objectStorageService = new ObjectStorageService();
     try {
+      console.log("Attempting to generate upload URL...");
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      console.log("Upload URL generated successfully:", uploadURL.substring(0, 100) + "...");
       res.json({ uploadURL });
     } catch (error) {
       console.error("Error generating upload URL:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ error: "Failed to generate upload URL" });
     }
   });

@@ -46,12 +46,28 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   });
 
   const handleGetUploadParameters = async () => {
-    const res = await apiRequest("POST", "/api/objects/upload", {});
-    const data = await res.json();
-    return {
-      method: "PUT" as const,
-      url: data.uploadURL,
-    };
+    console.log("Requesting upload parameters...");
+    try {
+      const res = await apiRequest("POST", "/api/objects/upload", {});
+      console.log("Upload params response status:", res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Upload params error response:", errorText);
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+      
+      const data = await res.json();
+      console.log("Upload params received:", { url: data.uploadURL?.substring(0, 100) + "..." });
+      
+      return {
+        method: "PUT" as const,
+        url: data.uploadURL,
+      };
+    } catch (error) {
+      console.error("Failed to get upload parameters:", error);
+      throw error;
+    }
   };
 
   const handleUploadComplete = useCallback((result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
