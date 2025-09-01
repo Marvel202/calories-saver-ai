@@ -91,34 +91,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectStorageService = new ObjectStorageService();
       const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
-      // Create the full accessible storage URL for n8n
+      // Create the full storage URL
       const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : 
         `https://storage.googleapis.com/replit-objstore-38096412-da93-467f-a5b2-946fefe42efe/.private${imageUrl}`;
 
-      console.log("Sending accessible image URL to n8n:", fullImageUrl);
+      // Fetch the image binary data
+      const imageResponse = await fetch(fullImageUrl);
+      if (!imageResponse.ok) {
+        console.error("Failed to fetch image from storage:", imageResponse.status);
+        throw new Error("Failed to fetch image from storage");
+      }
 
-      // Call n8n workflow for meal analysis
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || process.env.N8N_MEAL_ANALYSIS_WEBHOOK || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+      // Get image data
+      const imageBuffer = await imageResponse.arrayBuffer();
+      const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+      // Call n8n webhook with multipart/form-data
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      // Simplified webhook payload with accessible URL for n8n
-      const webhookPayload = {
-        imageUrl: fullImageUrl, // Send the full accessible URL
-        metadata: {
-          normalizedPath,
-          timestamp: new Date().toISOString()
-        }
-      };
+      // Create FormData
+      const FormData = require('form-data');
+      const formData = new FormData();
       
-      console.log("Sending to n8n webhook:", n8nWebhookUrl);
-      console.log("Payload:", JSON.stringify(webhookPayload, null, 2));
+      // Add the image as a binary file
+      formData.append('image', Buffer.from(imageBuffer), {
+        filename: 'image.jpg',
+        contentType: mimeType,
+      });
+      
+      // Add additional metadata as form fields
+      formData.append('imageUrl', normalizedPath);
+      formData.append('originalUrl', fullImageUrl);
+      formData.append('timestamp', new Date().toISOString());
+      
+      console.log("Sending binary data to n8n webhook:", n8nWebhookUrl);
       
       const n8nResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          ...formData.getHeaders(),
           "ngrok-skip-browser-warning": "true"
         },
-        body: JSON.stringify(webhookPayload),
+        body: formData,
       });
 
       if (!n8nResponse.ok) {
