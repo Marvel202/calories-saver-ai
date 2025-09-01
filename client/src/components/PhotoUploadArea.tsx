@@ -126,18 +126,23 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       // Use the existing upload infrastructure
       handleGetUploadParameters()
         .then(uploadParams => {
-          return fetch(uploadParams.url, {
+          // Store the original signed URL to construct final URL
+          const signedURL = uploadParams.url;
+          
+          return fetch(signedURL, {
             method: uploadParams.method,
             body: file,
+          }).then(response => {
+            if (!response.ok) {
+              throw new Error(`Upload failed with status: ${response.status}`);
+            }
+            // Construct the final object URL by removing query params from signed URL
+            const finalObjectURL = signedURL.split('?')[0];
+            return finalObjectURL;
           });
         })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Upload failed with status: ${response.status}`);
-          }
-          // Get the upload URL from the response
-          const uploadURL = response.url.split('?')[0]; // Remove query params
-          mockUppyResult.successful[0].uploadURL = uploadURL;
+        .then(finalObjectURL => {
+          mockUppyResult.successful[0].uploadURL = finalObjectURL;
           
           // Trigger the same completion handler as ObjectUploader
           handleUploadComplete(mockUppyResult as any);
