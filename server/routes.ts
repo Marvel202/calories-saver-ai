@@ -4,8 +4,6 @@ import { storage } from "./storage";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { insertMealAnalysisSchema, nutritionDataSchema } from "@shared/schema";
 import { z } from "zod";
-import FormData from "form-data";
-import fetch from "node-fetch";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -97,9 +95,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : 
         `https://storage.googleapis.com/replit-objstore-38096412-da93-467f-a5b2-946fefe42efe/.private${imageUrl}`;
 
-      // Fetch the image binary data using native fetch (it's fine for downloading)
-      console.log("Fetching image from:", fullImageUrl);
-      const imageResponse = await global.fetch(fullImageUrl); // Use global.fetch for downloading
+      // Fetch the image binary data
+      const imageResponse = await fetch(fullImageUrl);
       if (!imageResponse.ok) {
         console.error("Failed to fetch image from storage:", imageResponse.status);
         throw new Error("Failed to fetch image from storage");
@@ -108,38 +105,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get image data
       const imageBuffer = await imageResponse.arrayBuffer();
       const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
-      
-      console.log(`Image fetched successfully: ${imageBuffer.byteLength} bytes, ${mimeType}`);
 
       // Call n8n webhook with multipart/form-data
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      // Create FormData
+      // Create web-standard FormData (compatible with fetch)
       const formData = new FormData();
       
+      // Convert ArrayBuffer to Blob for web FormData
+      const imageBlob = new Blob([imageBuffer], { type: mimeType });
+      
       // Add the image as a binary file
-      const imageBufferNode = Buffer.from(imageBuffer);
-      formData.append('image', imageBufferNode, {
-        filename: `image.${mimeType.split('/')[1] || 'jpg'}`,
-        contentType: mimeType,
-      });
+      formData.append('image', imageBlob, 'image.jpg');
       
       // Add additional metadata as form fields
       formData.append('imageUrl', normalizedPath);
       formData.append('originalUrl', fullImageUrl);
       formData.append('timestamp', new Date().toISOString());
-      formData.append('mimeType', mimeType);
       
       console.log("Sending binary data to n8n webhook:", n8nWebhookUrl);
+      console.log("Form data keys:", Array.from(formData.keys()));
       
-      // Use node-fetch for multipart upload
       const n8nResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
-          ...formData.getHeaders(),
           "ngrok-skip-browser-warning": "true"
+          // Don't set Content-Type header - let fetch set it automatically for FormData
         },
-        body: formData, // node-fetch handles form-data streams properly
+        body: formData,
       });
 
       if (!n8nResponse.ok) {
@@ -156,7 +149,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const n8nData = await n8nResponse.json();
-      console.log("n8n response received:", Object.keys(n8nData));
       
       // Validate the nutrition data from n8n
       const nutrition = nutritionDataSchema.parse(n8nData.nutrition || n8nData);
