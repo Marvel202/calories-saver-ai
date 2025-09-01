@@ -57,17 +57,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Sending to n8n webhook:", n8nWebhookUrl);
       console.log("Payload:", JSON.stringify(webhookPayload, null, 2));
       
-      // Create URL with query parameters for GET request
-      const url = new URL(n8nWebhookUrl);
-      url.searchParams.set('imageUrl', webhookPayload.imageUrl);
-      url.searchParams.set('timestamp', webhookPayload.timestamp);
-      url.searchParams.set('originalUrl', webhookPayload.originalUrl);
-      
-      const n8nResponse = await fetch(url.toString(), {
-        method: "GET",
+      const n8nResponse = await fetch(n8nWebhookUrl, {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true"
         },
+        body: JSON.stringify(webhookPayload),
       });
 
       if (!n8nResponse.ok) {
