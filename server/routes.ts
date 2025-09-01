@@ -109,15 +109,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Call n8n webhook with multipart/form-data
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      // Create FormData
-      const FormData = require('form-data');
+      // Create web-standard FormData (compatible with fetch)
       const formData = new FormData();
       
+      // Convert ArrayBuffer to Blob for web FormData
+      const imageBlob = new Blob([imageBuffer], { type: mimeType });
+      
       // Add the image as a binary file
-      formData.append('image', Buffer.from(imageBuffer), {
-        filename: 'image.jpg',
-        contentType: mimeType,
-      });
+      formData.append('image', imageBlob, 'image.jpg');
       
       // Add additional metadata as form fields
       formData.append('imageUrl', normalizedPath);
@@ -125,12 +124,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       formData.append('timestamp', new Date().toISOString());
       
       console.log("Sending binary data to n8n webhook:", n8nWebhookUrl);
+      console.log("Form data keys:", Array.from(formData.keys()));
       
       const n8nResponse = await fetch(n8nWebhookUrl, {
         method: "POST",
         headers: {
-          ...formData.getHeaders(),
           "ngrok-skip-browser-warning": "true"
+          // Don't set Content-Type header - let fetch set it automatically for FormData
         },
         body: formData,
       });
