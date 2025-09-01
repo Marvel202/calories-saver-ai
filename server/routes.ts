@@ -22,23 +22,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/objects/upload", async (req, res) => {
-    console.log("Upload URL request received:", {
+    console.log("🔥 BROWSER Upload URL request received:", {
       method: req.method,
       url: req.url,
-      headers: req.headers,
+      userAgent: req.headers['user-agent'],
+      contentType: req.headers['content-type'],
       body: req.body
     });
     
+    // Add CORS headers explicitly  
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    
     const objectStorageService = new ObjectStorageService();
     try {
-      console.log("Attempting to generate upload URL...");
+      console.log("🔥 BROWSER Attempting to generate upload URL...");
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      console.log("Upload URL generated successfully:", uploadURL.substring(0, 100) + "...");
+      console.log("🔥 BROWSER Upload URL generated successfully:", uploadURL.substring(0, 100) + "...");
       res.json({ uploadURL });
     } catch (error) {
-      console.error("Error generating upload URL:", error);
-      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ error: "Failed to generate upload URL" });
+      console.error("🔥 BROWSER Error generating upload URL:", error);
+      console.error("🔥 BROWSER Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ error: "Failed to generate upload URL", details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

@@ -48,8 +48,17 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   const handleGetUploadParameters = async () => {
     console.log("Requesting upload parameters...");
     try {
-      const res = await apiRequest("POST", "/api/objects/upload", {});
+      // Make request directly with fetch to avoid apiRequest wrapper issues
+      const res = await fetch("/api/objects/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+      
       console.log("Upload params response status:", res.status);
+      console.log("Response headers:", Object.fromEntries(res.headers.entries()));
       
       if (!res.ok) {
         const errorText = await res.text();
