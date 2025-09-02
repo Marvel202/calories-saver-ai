@@ -15,6 +15,13 @@ import axios from "axios";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Created uploads directory:', uploadsDir);
+}
+
 // Configure multer for local file storage
 const storage_multer = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -77,7 +84,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     // Generate the public URL for the uploaded image
-    const imageUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? `https://${req.get('host')}` 
+      : "http://localhost:3000";
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
     console.log("📸 REAL: Image saved at:", imageUrl);
 
     res.json({ 
@@ -113,7 +123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Generate the public URL for the uploaded image
-        const imageUrl = `http://localhost:3000/uploads/${filename}`;
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? `https://${req.get('host')}` 
+          : "http://localhost:3000";
+        const imageUrl = `${baseUrl}/uploads/${filename}`;
         console.log("📸 REAL: Raw image saved at:", imageUrl);
         
         // For Uppy, the response should be the URL directly or a simple success
@@ -160,10 +173,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     
-    // Development mode: return real local upload URL  
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`${logPrefix} Development mode: returning real local upload URL`);
-      const realUploadURL = "http://localhost:3000/api/upload-image";
+    // Use local storage when PRIVATE_OBJECT_DIR is not set (fallback for non-Replit deployments)
+    if (!process.env.PRIVATE_OBJECT_DIR || process.env.NODE_ENV === 'development') {
+      console.log(`${logPrefix} Using local storage: returning real local upload URL`);
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? `https://${req.get('host')}` 
+        : "http://localhost:3000";
+      const realUploadURL = `${baseUrl}/api/upload-image`;
       res.json({ uploadURL: realUploadURL });
       return;
     }
