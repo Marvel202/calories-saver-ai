@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.options('/api/*', (req, res) => {
     console.log(`🔧 CORS preflight for ${req.url}`);
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.sendStatus(200);
   });
