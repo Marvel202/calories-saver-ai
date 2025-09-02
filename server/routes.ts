@@ -443,97 +443,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // For now, let's just return a mock response to test if the endpoint works
-      console.log("🧪 [STEP 4] Returning mock response for testing");
-      
-      return res.json({
-        analysisId: "mock-analysis-" + Date.now(),
-        nutrition: {
-          status: "success",
-          food: [
-            {
-              name: "Grilled Chicken Breast",
-              quantity: "150g",
-              calories: 165,
-              protein: 25,
-              carbs: 0,
-              fat: 7
-            },
-            {
-              name: "Brown Rice",
-              quantity: "100g",
-              calories: 85,
-              protein: 2,
-              carbs: 30,
-              fat: 1
-            }
-          ],
-          total: {
-            calories: 250,
-            protein: 27,
-            carbs: 30,
-            fat: 8,
-            fiber: 5,
-            sugar: 12,
-            sodium: 400
-          },
-          items: []
-        },
-        imageUrl: imageUrl,
-        message: "Mock response - endpoint is working"
-      });
-
-      // The rest of the code is commented out for debugging
-      /*
       // Call n8n webhook with the actual image file
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
+      console.log("🚀 [STEP 4] Calling real n8n webhook for AI analysis");
       
-      console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
-      console.log("📤 Sending image file directly to n8n");
-      
-      // Read the image file from disk
-      let imageBuffer: Buffer;
-      let imagePath: string;
-      
-      console.log("🔍 Checking image URL format:", imageUrl);
-      
-      if (imageUrl.includes('/uploads/')) {
-        // Local file - read from disk
-        const filename = imageUrl.split('/uploads/')[1];
-        imagePath = path.join(__dirname, '../uploads', filename);
-        
-        console.log("📂 Attempting to read local file:");
-        console.log("  - Filename:", filename);
-        console.log("  - Full path:", imagePath);
-        console.log("  - __dirname:", __dirname);
-        
-        try {
-          // Check if file exists first
-          if (!fs.existsSync(imagePath)) {
-            console.error("❌ File does not exist:", imagePath);
-            throw new Error(`Image file not found: ${imagePath}`);
-          }
-          
-          imageBuffer = fs.readFileSync(imagePath);
-          console.log("✅ Successfully read local image file:", imagePath, "Size:", imageBuffer.length, "bytes");
-        } catch (err) {
-          console.error("📸 REAL: Error reading local image file:", err);
-          throw new Error(`Failed to read image file: ${imagePath}`);
-        }
-      } else {
-        // External URL - fetch the image
-        console.log("📸 Fetching external image:", imageUrl);
-        const imageResponse = await fetch(imageUrl);
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
-        }
-        const arrayBuffer = await imageResponse.arrayBuffer();
-        imageBuffer = Buffer.from(arrayBuffer);
-        console.log("📸 Fetched external image. Size:", imageBuffer.length, "bytes");
-      }
-      */
-
-      // Call n8n webhook with the actual image file
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
       
       console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
