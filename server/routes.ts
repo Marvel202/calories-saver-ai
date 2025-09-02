@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testImageUrl = "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?w=500";
       
       // Call n8n webhook with the test image URL
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
       
       const webhookPayload = {
         originalUrl: testImageUrl,  // n8n expects 'originalUrl'
@@ -426,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // The rest of the code is commented out for debugging
       /*
       // Call n8n webhook with the actual image file
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
       
       console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
       console.log("📤 Sending image file directly to n8n");
@@ -474,7 +474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       */
 
       // Call n8n webhook with the actual image file
-      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
       
       console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
       console.log("📤 Sending image file directly to n8n");
