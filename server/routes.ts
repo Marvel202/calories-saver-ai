@@ -369,11 +369,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("📸 Analyzing meal with image URL:", imageUrl);
 
-      // In development mode, use the imageUrl directly (it's a mock URL)
+      // Use the imageUrl directly - it should already be accessible
       let accessibleImageUrl = imageUrl;
       
-      if (process.env.NODE_ENV !== 'development') {
-        // Production mode: normalize the object path for storage
+      // If we don't have PRIVATE_OBJECT_DIR (using local storage), use imageUrl as-is
+      if (!process.env.PRIVATE_OBJECT_DIR) {
+        console.log("Using local storage - image URL:", accessibleImageUrl);
+      } else {
+        // Production mode with object storage: normalize the object path
         const objectStorageService = new ObjectStorageService();
         const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
 
