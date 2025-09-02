@@ -64,14 +64,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     if (allowedOrigins.includes(origin)) {
       res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
     } else {
       // For other origins, use wildcard but no credentials
       res.header('Access-Control-Allow-Origin', '*');
+      // Don't set credentials header for wildcard origins
     }
     
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-    res.header('Access-Control-Allow-Credentials', 'true');
   };
   
   // Add debugging middleware to track API route hits
