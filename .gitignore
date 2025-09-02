@@ -43,3 +43,4 @@ vite.config.ts.*
 # Coverage
 coverage/
 *.lcov
+.vercel
