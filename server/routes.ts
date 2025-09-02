@@ -173,13 +173,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     
-    // Use local storage when PRIVATE_OBJECT_DIR is not set (fallback for non-Replit deployments)
-    if (!process.env.PRIVATE_OBJECT_DIR || process.env.NODE_ENV === 'development') {
-      console.log(`${logPrefix} Using local storage: returning real local upload URL`);
+    // Debug environment variables
+    console.log(`${logPrefix} Environment check:`, {
+      NODE_ENV: process.env.NODE_ENV,
+      PRIVATE_OBJECT_DIR: process.env.PRIVATE_OBJECT_DIR,
+      PRIVATE_OBJECT_DIR_exists: !!process.env.PRIVATE_OBJECT_DIR,
+      will_use_local: (!process.env.PRIVATE_OBJECT_DIR || process.env.NODE_ENV === 'development')
+    });
+    
+    // Force local storage for non-Replit deployments (when PRIVATE_OBJECT_DIR is not set)
+    if (!process.env.PRIVATE_OBJECT_DIR) {
+      console.log(`${logPrefix} PRIVATE_OBJECT_DIR not set - using local multer storage`);
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? `https://${req.get('host')}` 
         : "http://localhost:3000";
       const realUploadURL = `${baseUrl}/api/upload-image`;
+      console.log(`${logPrefix} Returning local upload URL: ${realUploadURL}`);
       res.json({ uploadURL: realUploadURL });
       return;
     }
