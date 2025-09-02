@@ -426,10 +426,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysisId: "mock-analysis-" + Date.now(),
         nutrition: {
           status: "success",
-          food: "Mock Food Item",
+          food: [
+            {
+              name: "Grilled Chicken Breast",
+              quantity: "150g",
+              calories: 165,
+              protein: 25,
+              carbs: 0,
+              fat: 7
+            },
+            {
+              name: "Brown Rice",
+              quantity: "100g",
+              calories: 85,
+              protein: 2,
+              carbs: 30,
+              fat: 1
+            }
+          ],
           total: {
             calories: 250,
-            protein: 15,
+            protein: 27,
             carbs: 30,
             fat: 8,
             fiber: 5,
