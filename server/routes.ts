@@ -103,12 +103,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.options("/api/upload-image", (req, res) => {
     console.log("🔧 CORS preflight for upload endpoint");
     setCorsHeaders(req, res);
+    // Allow both POST and PUT methods
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
     res.sendStatus(200);
   });
 
   // Real file upload endpoint - handles both PUT (Uppy) and POST (form data)
   app.post("/api/upload-image", upload.single('image'), (req, res) => {
     console.log("📸 REAL: POST multipart image upload received");
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    // Generate the public URL for the uploaded image
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? `https://${req.get('host')}` 
+      : "http://localhost:3000";
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    console.log("📸 REAL: Image saved at:", imageUrl);
+
+    res.json({ 
+      success: true,
+      imageUrl: imageUrl,
+      filename: req.file.filename
+    });
+  });
+
+  // Handle PUT requests for upload (used by some upload libraries)
+  app.put("/api/upload-image", upload.single('image'), (req, res) => {
+    console.log("📸 REAL: PUT multipart image upload received");
     
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
