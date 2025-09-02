@@ -445,6 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Call n8n webhook with the actual image file
       console.log("🚀 [STEP 4] Calling real n8n webhook for AI analysis");
+      console.log("🚨 DEBUG: This should NOT show mock data anymore!");
       
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
       
