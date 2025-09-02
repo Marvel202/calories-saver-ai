@@ -444,9 +444,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log("📸 [STEP 2] Analyzing meal with image URL:", imageUrl);
+      console.log("📸 [STEP 2] Image URL type:", typeof imageUrl);
+
+      // Handle case where imageUrl might be an object from upload response
+      let actualImageUrl: string;
+      if (typeof imageUrl === 'string') {
+        actualImageUrl = imageUrl;
+      } else if (typeof imageUrl === 'object' && imageUrl.imageUrl) {
+        console.log("🔧 [STEP 2] Extracting imageUrl from upload response object");
+        actualImageUrl = imageUrl.imageUrl;
+      } else {
+        console.error("❌ [STEP 2] Invalid imageUrl format:", imageUrl);
+        return res.status(400).json({ error: "Invalid image URL format" });
+      }
+
+      console.log("📸 [STEP 3] Using actual image URL:", actualImageUrl);
 
       // Use the imageUrl directly - it should already be accessible
-      let accessibleImageUrl = imageUrl;
+      let accessibleImageUrl = actualImageUrl;
       
       // If we don't have PRIVATE_OBJECT_DIR (using local storage), use imageUrl as-is
       if (!process.env.PRIVATE_OBJECT_DIR) {
