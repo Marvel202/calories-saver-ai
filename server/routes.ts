@@ -109,9 +109,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Call n8n webhook with JSON payload containing the accessible image URL
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      // Send JSON with the accessible image URL
+      // Send JSON with the accessible image URL (matching n8n workflow expectation)
       const webhookPayload = {
-        imageUrl: accessibleImageUrl,  // This will be https://calorie-snap-marvel202.replit.app/objects/uploads/...
+        originalUrl: accessibleImageUrl,  // n8n expects 'originalUrl' in $json.body.originalUrl
+        imageUrl: accessibleImageUrl,     // Keep both for compatibility
         normalizedPath: normalizedPath,
         mimeType: "image/jpeg", // You can hardcode this or detect it
         timestamp: new Date().toISOString()

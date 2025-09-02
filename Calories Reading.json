@@ -1,0 +1,151 @@
+{
+  "name": "Calories Reading",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e52946b4-075f-472b-8242-d245d1b12a92",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "2cff0b15-3f2c-4906-bfa4-7fe4ce695e2f",
+      "name": "Webhook",
+      "webhookId": "e52946b4-075f-472b-8242-d245d1b12a92"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.originalUrl }}",
+        "options": {
+          "systemMessage": "You are a qualified nutrition consultant. Analyze the dish in this image and provide a detailed nutritional breakdown, including estimated calories, macronutrients (protein, carbs, fats), and any notable micronutrients or health considerations."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b9fdd8e0-e5bd-4446-96eb-6be6e7ed4f34",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "mistral-medium-2505",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "00069613-a101-4dcf-9af4-714fc3d73650",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "GErEwjYu7uXRpjtz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Macronutrient reading\nThis is to receive uploaded image from Calories Saver App and use Mistral LLM's image understanding capabilities to return the composition of the dish captured and its total calories.",
+        "height": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "5af4d29e-b756-43f4-839b-a734c1ded7a6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook open to listening\nCalories Saver will consume the API",
+        "height": 224,
+        "width": 416,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "343e9fe6-745f-4e27-be90-1d28d18e8c41",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## To do\nParse the data",
+        "height": 208,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -816,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "b19cd8d6-869c-46ae-810a-90d4fb288048",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d075ce63-be8b-4eb2-b522-089a6a4b02b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dd0f3e3d49f122e940d2735ff0be4135cdd394eb527f9a2c59eabb7b24155427"
+  },
+  "id": "Juqwwq5EAqBu3VWP",
+  "tags": [
+    {
+      "createdAt": "2025-08-31T13:59:02.105Z",
+      "updatedAt": "2025-08-31T13:59:02.105Z",
+      "id": "c9yssu7K5c5epVE3",
+      "name": "webhook"
+    }
+  ]
+}
