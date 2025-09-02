@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type MealAnalysis, type InsertMealAnalysis } from "@shared/schema";
+import { type User, type InsertUser, type MealAnalysis, type InsertMealAnalysis, type NutritionData } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -41,16 +41,7 @@ export class MemStorage implements IStorage {
     const analysis: MealAnalysis = { 
       id,
       imageUrl: insertAnalysis.imageUrl,
-      nutrition: {
-        calories: insertAnalysis.nutrition.calories,
-        protein: insertAnalysis.nutrition.protein,
-        carbs: insertAnalysis.nutrition.carbs,
-        fat: insertAnalysis.nutrition.fat,
-        confidence: insertAnalysis.nutrition.confidence,
-        foodItems: Array.isArray(insertAnalysis.nutrition.foodItems) 
-          ? insertAnalysis.nutrition.foodItems as string[]
-          : []
-      },
+      nutrition: insertAnalysis.nutrition as NutritionData,
       feedback: insertAnalysis.feedback || null,
       createdAt: new Date()
     };

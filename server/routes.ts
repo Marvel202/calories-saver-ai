@@ -277,16 +277,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Return mock nutrition data that matches our schema
     const mockNutrition = {
-      calories: 450,
-      protein: 25,
-      carbs: 35,
-      fat: 22,
-      confidence: 0.85,
-      foodItems: [
-        "Grilled Chicken Breast",
-        "Mixed Vegetables", 
-        "Brown Rice"
-      ]
+      status: "success",
+      food: [
+        {
+          name: "Grilled Chicken Breast",
+          quantity: "1 medium piece (150g)",
+          calories: 200,
+          protein: 22,
+          carbs: 0,
+          fat: 8
+        },
+        {
+          name: "Mixed Vegetables",
+          quantity: "1 cup (120g)",
+          calories: 50,
+          protein: 2,
+          carbs: 10,
+          fat: 0
+        },
+        {
+          name: "Brown Rice",
+          quantity: "0.5 cup cooked (90g)",
+          calories: 200,
+          protein: 1,
+          carbs: 25,
+          fat: 14
+        }
+      ],
+      total: {
+        calories: 450,
+        protein: 25,
+        carbs: 35,
+        fat: 22
+      }
     };
 
     try {
