@@ -9,6 +9,9 @@
 node_modules/
 dist/
 
+# File uploads (local development only)
+uploads/
+
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -43,4 +46,9 @@ vite.config.ts.*
 # Coverage
 coverage/
 *.lcov
+# Deployment
 .vercel
+
+# Replit files (not needed for production)
+.replit
+replit.nix
