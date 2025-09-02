@@ -52,19 +52,42 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Helper function to set CORS headers properly
+  const setCorsHeaders = (req: any, res: any) => {
+    const origin = req.headers.origin;
+    // Allow requests from Vercel frontend and localhost for development
+    const allowedOrigins = [
+      'https://calorie-snap-sigma.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      // For other origins, use wildcard but no credentials
+      res.header('Access-Control-Allow-Origin', '*');
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  };
+  
   // Add debugging middleware to track API route hits
   app.use('/api/*', (req, res, next) => {
     const userAgent = req.headers['user-agent']?.substring(0, 50) || 'Unknown';
     console.log(`🔍 API Route intercepted: ${req.method} ${req.url} from ${userAgent}`);
+    
+    // Set CORS headers for all API requests
+    setCorsHeaders(req, res);
     next();
   });
 
   // Handle CORS preflight requests for API endpoints
   app.options('/api/*', (req, res) => {
-    console.log(`🔧 CORS preflight for ${req.url}`);
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    console.log(`🔧 CORS preflight for ${req.url} from origin: ${req.headers.origin}`);
+    setCorsHeaders(req, res);
     res.sendStatus(200);
   });
 
@@ -78,20 +101,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handle CORS preflight for upload endpoint
   app.options("/api/upload-image", (req, res) => {
     console.log("🔧 CORS preflight for upload endpoint");
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    setCorsHeaders(req, res);
     res.sendStatus(200);
   });
 
   // Real file upload endpoint - handles both PUT (Uppy) and POST (form data)
   app.post("/api/upload-image", upload.single('image'), (req, res) => {
     console.log("📸 REAL: POST multipart image upload received");
-    
-    // Add CORS headers for upload endpoint
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
@@ -114,11 +130,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handle PUT uploads from Uppy (raw file data)
   app.put("/api/upload-image", (req, res) => {
     console.log("📸 REAL: PUT raw image upload received");
-    
-    // Add CORS headers for upload endpoint
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
     // Generate unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -187,11 +198,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString()
     });
     
-    // Add CORS headers explicitly  
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    
     // Debug environment variables
     console.log(`${logPrefix} Environment check:`, {
       NODE_ENV: process.env.NODE_ENV,
@@ -239,20 +245,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/mock-upload", async (req, res) => {
     console.log("📸 DEV: Mock upload received, simulating successful upload");
     
-    // Add CORS headers
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    
     // Simulate upload success
     res.status(200).json({ success: true });
   });
 
   // Handle CORS preflight for mock upload
   app.options("/api/mock-upload", (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    setCorsHeaders(req, res);
     res.sendStatus(200);
   });
 
