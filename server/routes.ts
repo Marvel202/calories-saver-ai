@@ -75,9 +75,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+  // Handle CORS preflight for upload endpoint
+  app.options("/api/upload-image", (req, res) => {
+    console.log("🔧 CORS preflight for upload endpoint");
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendStatus(200);
+  });
+
   // Real file upload endpoint - handles both PUT (Uppy) and POST (form data)
   app.post("/api/upload-image", upload.single('image'), (req, res) => {
     console.log("📸 REAL: POST multipart image upload received");
+    
+    // Add CORS headers for upload endpoint
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
@@ -100,6 +114,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handle PUT uploads from Uppy (raw file data)
   app.put("/api/upload-image", (req, res) => {
     console.log("📸 REAL: PUT raw image upload received");
+    
+    // Add CORS headers for upload endpoint
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
     // Generate unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
