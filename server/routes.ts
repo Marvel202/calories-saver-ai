@@ -458,8 +458,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("🔍 Checking image URL format:", imageUrl);
       
-      if (imageUrl.includes('/uploads/')) {
-        // Local file - read from disk
+      // In production (Render), always fetch via HTTP since local storage is ephemeral
+      if (process.env.NODE_ENV === 'production' || !imageUrl.includes('/uploads/')) {
+        // External URL or production - fetch the image via HTTP
+        console.log("📸 Fetching image via HTTP (production mode):", imageUrl);
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+        }
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuffer);
+        console.log("📸 Fetched image via HTTP. Size:", imageBuffer.length, "bytes");
+      } else if (imageUrl.includes('/uploads/')) {
+        // Local development - read from disk
         const filename = imageUrl.split('/uploads/')[1];
         imagePath = path.join(__dirname, '../uploads', filename);
         
@@ -482,15 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Failed to read image file: ${imagePath}`);
         }
       } else {
-        // External URL - fetch the image
-        console.log("📸 Fetching external image:", imageUrl);
-        const imageResponse = await fetch(imageUrl);
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
-        }
-        const arrayBuffer = await imageResponse.arrayBuffer();
-        imageBuffer = Buffer.from(arrayBuffer);
-        console.log("📸 Fetched external image. Size:", imageBuffer.length, "bytes");
+        throw new Error("Unsupported image URL format");
       }
       
       // Create multipart/form-data with the image file
