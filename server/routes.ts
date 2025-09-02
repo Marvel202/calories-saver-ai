@@ -358,28 +358,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Meal analysis endpoint - CORRECTED VERSION
+  // Meal analysis endpoint - DEBUGGING VERSION
   app.post("/api/analyze-meal", async (req, res) => {
     try {
-      console.log("🔍 Starting meal analysis - Request body:", req.body);
+      console.log("🔍 [STEP 1] Starting meal analysis - Request body:", req.body);
       
       const { imageUrl } = req.body;
       
       if (!imageUrl) {
-        console.error("❌ No image URL provided");
+        console.error("❌ [STEP 1] No image URL provided");
         return res.status(400).json({ error: "Image URL is required" });
       }
 
-      console.log("📸 Analyzing meal with image URL:", imageUrl);
+      console.log("📸 [STEP 2] Analyzing meal with image URL:", imageUrl);
 
       // Use the imageUrl directly - it should already be accessible
       let accessibleImageUrl = imageUrl;
       
       // If we don't have PRIVATE_OBJECT_DIR (using local storage), use imageUrl as-is
       if (!process.env.PRIVATE_OBJECT_DIR) {
-        console.log("✅ Using local storage - image URL:", accessibleImageUrl);
+        console.log("✅ [STEP 3] Using local storage - image URL:", accessibleImageUrl);
       } else {
-        console.log("🔄 Using object storage mode");
+        console.log("🔄 [STEP 3] Using object storage mode");
         // Production mode with object storage: normalize the object path
         const objectStorageService = new ObjectStorageService();
         const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
@@ -399,6 +399,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error("Image not found in storage");
         }
       }
+
+      // For now, let's just return a mock response to test if the endpoint works
+      console.log("🧪 [STEP 4] Returning mock response for testing");
+      
+      return res.json({
+        analysisId: "mock-analysis-" + Date.now(),
+        nutrition: {
+          status: "success",
+          food: "Mock Food Item",
+          total: {
+            calories: 250,
+            protein: 15,
+            carbs: 30,
+            fat: 8,
+            fiber: 5,
+            sugar: 12,
+            sodium: 400
+          },
+          items: []
+        },
+        imageUrl: imageUrl,
+        message: "Mock response - endpoint is working"
+      });
+
+      // The rest of the code is commented out for debugging
+      /*
+      // Call n8n webhook with the actual image file
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
+      
+      console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
+      console.log("📤 Sending image file directly to n8n");
+      
+      // Read the image file from disk
+      let imageBuffer: Buffer;
+      let imagePath: string;
+      
+      console.log("🔍 Checking image URL format:", imageUrl);
+      
+      if (imageUrl.includes('/uploads/')) {
+        // Local file - read from disk
+        const filename = imageUrl.split('/uploads/')[1];
+        imagePath = path.join(__dirname, '../uploads', filename);
+        
+        console.log("📂 Attempting to read local file:");
+        console.log("  - Filename:", filename);
+        console.log("  - Full path:", imagePath);
+        console.log("  - __dirname:", __dirname);
+        
+        try {
+          // Check if file exists first
+          if (!fs.existsSync(imagePath)) {
+            console.error("❌ File does not exist:", imagePath);
+            throw new Error(`Image file not found: ${imagePath}`);
+          }
+          
+          imageBuffer = fs.readFileSync(imagePath);
+          console.log("✅ Successfully read local image file:", imagePath, "Size:", imageBuffer.length, "bytes");
+        } catch (err) {
+          console.error("📸 REAL: Error reading local image file:", err);
+          throw new Error(`Failed to read image file: ${imagePath}`);
+        }
+      } else {
+        // External URL - fetch the image
+        console.log("📸 Fetching external image:", imageUrl);
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+        }
+        const arrayBuffer = await imageResponse.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuffer);
+        console.log("📸 Fetched external image. Size:", imageBuffer.length, "bytes");
+      }
+      */
 
       // Call n8n webhook with the actual image file
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
