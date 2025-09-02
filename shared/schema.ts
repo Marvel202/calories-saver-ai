@@ -13,12 +13,21 @@ export const mealAnalyses = pgTable("meal_analyses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   imageUrl: text("image_url").notNull(),
   nutrition: json("nutrition").$type<{
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    confidence: number;
-    foodItems: string[];
+    status: string;
+    food: Array<{
+      name: string;
+      quantity: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }>;
+    total: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    };
   }>().notNull(),
   feedback: integer("feedback"), // 1-4 rating
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -35,18 +44,26 @@ export const insertMealAnalysisSchema = createInsertSchema(mealAnalyses).pick({
   feedback: true,
 });
 
+export const nutritionDataSchema = z.object({
+  status: z.string(),
+  food: z.array(z.object({
+    name: z.string(),
+    quantity: z.string(),
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number(),
+  })),
+  total: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number(),
+  }),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type MealAnalysis = typeof mealAnalyses.$inferSelect;
 export type InsertMealAnalysis = z.infer<typeof insertMealAnalysisSchema>;
-
-export const nutritionDataSchema = z.object({
-  calories: z.number(),
-  protein: z.number(),
-  carbs: z.number(), 
-  fat: z.number(),
-  confidence: z.number().min(0).max(1),
-  foodItems: z.array(z.string()),
-});
-
 export type NutritionData = z.infer<typeof nutritionDataSchema>;

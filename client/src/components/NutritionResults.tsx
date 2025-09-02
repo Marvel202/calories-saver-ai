@@ -39,7 +39,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
   };
 
   const handleShare = async () => {
-    const shareText = `Just analyzed my meal with Calories Saver AI: ${nutrition.calories} calories, ${nutrition.protein}g protein, ${nutrition.carbs}g carbs, ${nutrition.fat}g fat`;
+    const shareText = `Just analyzed my meal with Calories Saver AI: ${nutrition.total.calories} calories, ${nutrition.total.protein}g protein, ${nutrition.total.carbs}g carbs, ${nutrition.total.fat}g fat`;
     
     if (navigator.share) {
       try {
@@ -88,9 +88,32 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           <img 
             src={imageUrl} 
             alt="Analyzed meal" 
-            className="w-full h-56 object-cover"
+            className="w-full h-80 object-cover"
             data-testid="img-analyzed-meal"
           />
+        </div>
+      </div>
+
+      {/* Food Items List */}
+      <div className="elevation-2 rounded-3xl p-6 hover-lift">
+        <h4 className="text-xl font-bold text-gray-900 mb-4">Detected Food Items</h4>
+        <div className="space-y-3">
+          {nutrition.food.map((item, index) => (
+            <div key={index} className="elevation-1 rounded-2xl p-4 hover-lift">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h5 className="font-semibold text-gray-900">{item.name}</h5>
+                  <p className="text-gray-600 text-sm">{item.quantity}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">{item.calories} cal</p>
+                  <p className="text-sm text-gray-600">
+                    {item.protein}g P • {item.carbs}g C • {item.fat}g F
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -102,7 +125,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </div>
           <h4 className="font-bold text-gray-900 mb-2 text-lg">Protein</h4>
           <p className="text-3xl font-bold text-primary mb-2" data-testid="text-protein">
-            {nutrition.protein}g
+            {nutrition.total.protein}g
           </p>
           <p className="text-gray-600 font-medium">Essential amino acids</p>
         </div>
@@ -113,7 +136,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </div>
           <h4 className="font-bold text-gray-900 mb-2 text-lg">Carbs</h4>
           <p className="text-3xl font-bold text-accent mb-2" data-testid="text-carbs">
-            {nutrition.carbs}g
+            {nutrition.total.carbs}g
           </p>
           <p className="text-gray-600 font-medium">Energy source</p>
         </div>
@@ -124,7 +147,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </div>
           <h4 className="font-bold text-gray-900 mb-2 text-lg">Fat</h4>
           <p className="text-3xl font-bold text-secondary mb-2" data-testid="text-fat">
-            {nutrition.fat}g
+            {nutrition.total.fat}g
           </p>
           <p className="text-gray-600 font-medium">Healthy fats</p>
         </div>
@@ -139,7 +162,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </div>
           <div className="text-right">
             <p className="text-4xl font-bold text-gray-900" data-testid="text-calories">
-              {nutrition.calories}
+              {nutrition.total.calories}
             </p>
             <p className="text-gray-700 font-medium">kcal</p>
           </div>
@@ -177,7 +200,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           <Button 
             onClick={onRetry}
             variant="secondary"
-            className="tactile-button px-8 py-4 text-gray-700 rounded-2xl font-semibold flex items-center space-x-3"
+            className="tactile-button px-8 py-4 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-2xl font-semibold flex items-center space-x-3 elevation-1"
             data-testid="button-retry"
           >
             <RotateCcw size={24} />
@@ -185,7 +208,7 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </Button>
           <Button 
             onClick={handleShare}
-            className="tactile-button px-8 py-4 bg-accent text-white rounded-2xl font-semibold flex items-center space-x-3"
+            className="tactile-button px-8 py-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-2xl font-semibold flex items-center space-x-3 elevation-2 shadow-lg"
             data-testid="button-share"
           >
             <Share2 size={24} />

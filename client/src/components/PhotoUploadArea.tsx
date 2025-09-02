@@ -22,7 +22,11 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
 
   const analyzeImageMutation = useMutation({
     mutationFn: async (imageUrl: string) => {
-      const res = await apiRequest("POST", "/api/analyze-meal", { imageUrl });
+      // TEMPORARILY: Always use the real endpoint to test n8n webhook
+      const endpoint = '/api/analyze-meal';
+      console.log("🌐 BROWSER: Using endpoint:", endpoint, "for image:", imageUrl);
+      
+      const res = await apiRequest("POST", endpoint, { imageUrl });
       return res.json();
     },
     onSuccess: (data, imageUrl) => {
@@ -76,7 +80,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       });
       
       return {
-        method: "PUT" as const,
+        method: "PUT" as const,  // Keep PUT for compatibility with Uppy
         url: data.uploadURL,
       };
     } catch (error) {
@@ -88,7 +92,29 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
 
   const handleUploadComplete = useCallback((result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (result.successful && result.successful.length > 0) {
-      const imageUrl = result.successful[0].uploadURL;
+      let imageUrl = result.successful[0].uploadURL;
+      
+      // Check if we're using the new local upload endpoint
+      if (imageUrl && imageUrl.includes('/api/upload-image')) {
+        // For local uploads, the uploadURL is the endpoint, but we need the response
+        // Uppy should have stored the response in the result
+        const response = result.successful[0].response;
+        if (typeof response === 'string') {
+          // PUT endpoint returns the image URL directly as a string
+          imageUrl = response;
+        } else if (response && typeof response === 'object' && 'imageUrl' in response) {
+          // POST endpoint returns JSON with imageUrl field
+          imageUrl = (response as any).imageUrl;
+        }
+        console.log("🌐 BROWSER: Local upload detected, using real image URL:", imageUrl);
+      }
+      
+      // Legacy: Development mode fallback for mock uploads
+      if (imageUrl && imageUrl.includes('/api/mock-upload')) {
+        imageUrl = "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?w=800&h=600&fit=crop";
+        console.log("🌐 BROWSER: Mock upload detected, using placeholder image URL:", imageUrl);
+      }
+      
       if (imageUrl) {
         setIsAnalyzing(true);
         setProgress(0);
@@ -152,14 +178,30 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
           return fetch(uploadParams.url, {
             method: uploadParams.method,
             body: file,
-          }).then(response => {
+          }).then(async response => {
             console.log('Camera upload: Response status:', response.status);
             if (!response.ok) {
               throw new Error(`Upload failed with status: ${response.status}`);
             }
             
-            // Get the final URL by removing query parameters
-            const finalURL = uploadParams.url.split('?')[0];
+            let finalURL: string;
+            
+            // Check if we're using the new local upload endpoint
+            if (uploadParams.url.includes('/api/upload-image')) {
+              // For local uploads, the response contains the image URL
+              const responseText = await response.text();
+              finalURL = responseText; // PUT endpoint returns URL directly
+              console.log('🌐 BROWSER: Camera upload local mode, using real image URL:', finalURL);
+            } else if (uploadParams.url.includes('/api/mock-upload')) {
+              // Legacy mock upload fallback
+              finalURL = "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?w=800&h=600&fit=crop";
+              console.log('🌐 BROWSER: Camera upload mock mode, using placeholder image URL:', finalURL);
+            } else {
+              // Default behavior for other endpoints
+              finalURL = uploadParams.url.split('?')[0];
+              console.log('🌐 BROWSER: Camera upload default mode, using endpoint URL:', finalURL);
+            }
+            
             console.log('Camera upload: Success, final URL:', finalURL);
             
             // Clear progress interval
