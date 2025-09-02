@@ -361,9 +361,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Meal analysis endpoint - CORRECTED VERSION
   app.post("/api/analyze-meal", async (req, res) => {
     try {
+      console.log("🔍 Starting meal analysis - Request body:", req.body);
+      
       const { imageUrl } = req.body;
       
       if (!imageUrl) {
+        console.error("❌ No image URL provided");
         return res.status(400).json({ error: "Image URL is required" });
       }
 
@@ -374,8 +377,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If we don't have PRIVATE_OBJECT_DIR (using local storage), use imageUrl as-is
       if (!process.env.PRIVATE_OBJECT_DIR) {
-        console.log("Using local storage - image URL:", accessibleImageUrl);
+        console.log("✅ Using local storage - image URL:", accessibleImageUrl);
       } else {
+        console.log("🔄 Using object storage mode");
         // Production mode with object storage: normalize the object path
         const objectStorageService = new ObjectStorageService();
         const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
@@ -399,21 +403,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Call n8n webhook with the actual image file
       const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook-test/e52946b4-075f-472b-8242-d245d1b12a92/";
       
-      console.log("Sending to n8n webhook:", n8nWebhookUrl);
-      console.log("Sending image file directly to n8n");
+      console.log("🔗 Sending to n8n webhook:", n8nWebhookUrl);
+      console.log("📤 Sending image file directly to n8n");
       
       // Read the image file from disk
       let imageBuffer: Buffer;
       let imagePath: string;
+      
+      console.log("🔍 Checking image URL format:", imageUrl);
       
       if (imageUrl.includes('/uploads/')) {
         // Local file - read from disk
         const filename = imageUrl.split('/uploads/')[1];
         imagePath = path.join(__dirname, '../uploads', filename);
         
+        console.log("📂 Attempting to read local file:");
+        console.log("  - Filename:", filename);
+        console.log("  - Full path:", imagePath);
+        console.log("  - __dirname:", __dirname);
+        
         try {
+          // Check if file exists first
+          if (!fs.existsSync(imagePath)) {
+            console.error("❌ File does not exist:", imagePath);
+            throw new Error(`Image file not found: ${imagePath}`);
+          }
+          
           imageBuffer = fs.readFileSync(imagePath);
-          console.log("📸 Read local image file:", imagePath, "Size:", imageBuffer.length, "bytes");
+          console.log("✅ Successfully read local image file:", imagePath, "Size:", imageBuffer.length, "bytes");
         } catch (err) {
           console.error("📸 Error reading local image file:", err);
           throw new Error(`Failed to read image file: ${imagePath}`);
@@ -431,6 +448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create multipart/form-data with the image file
+      console.log("📦 Creating form data for n8n webhook");
       const formData = new FormData();
       
       // Add the image file
@@ -443,12 +461,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       formData.append('timestamp', new Date().toISOString());
       formData.append('mimeType', 'image/jpeg');
       
+      console.log("🚀 Sending request to n8n webhook...");
+      
       const n8nResponse = await axios.post(n8nWebhookUrl, formData, {
         headers: {
           "ngrok-skip-browser-warning": "true",
           ...formData.getHeaders()  // This sets Content-Type: multipart/form-data with boundary
-        }
+        },
+        timeout: 30000  // 30 second timeout
       });
+
+      console.log("✅ n8n webhook response status:", n8nResponse.status);
 
       if (n8nResponse.status !== 200) {
         const responseText = typeof n8nResponse.data === 'string' ? n8nResponse.data : JSON.stringify(n8nResponse.data);
@@ -504,10 +527,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error analyzing meal:", error);
+      console.error("❌ Error analyzing meal:", error);
+      console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      console.error("❌ Error details:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : 'Unknown',
+        timestamp: new Date().toISOString()
+      });
+      
       res.status(500).json({ 
         error: "Failed to analyze meal",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
       });
     }
   });
