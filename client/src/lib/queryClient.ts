@@ -1,5 +1,16 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Get the backend URL from environment variable or default
+const getBackendUrl = () => {
+  // In production, use the Render backend URL
+  // In development, use the local backend
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 
+    (import.meta.env.PROD ? 'https://calorie-snap-backend.onrender.com' : 'http://localhost:5000');
+  
+  console.log(`🔗 Using backend URL: ${backendUrl}`);
+  return backendUrl;
+};
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -12,7 +23,11 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Build the full URL with backend base URL
+  const fullUrl = url.startsWith('http') ? url : `${getBackendUrl()}${url}`;
+  console.log(`📡 API Request: ${method} ${fullUrl}`);
+  
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,

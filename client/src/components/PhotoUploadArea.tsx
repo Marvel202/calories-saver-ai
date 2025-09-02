@@ -54,8 +54,15 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
     const startTime = Date.now();
     
     try {
+      // Get the backend URL (same logic as in queryClient)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 
+        (import.meta.env.PROD ? 'https://calorie-snap-backend.onrender.com' : 'http://localhost:5000');
+      
+      const fullUrl = `${backendUrl}/api/objects/upload`;
+      console.log(`🔗 Making upload params request to: ${fullUrl}`);
+      
       // Make request directly with fetch to avoid apiRequest wrapper issues
-      const res = await fetch("/api/objects/upload", {
+      const res = await fetch(fullUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
