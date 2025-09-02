@@ -137,6 +137,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("📸 DEBUG: Body size:", req.body ? req.body.length : 0);
     console.log("📸 DEBUG: Body type:", typeof req.body);
     
+    // Ensure CORS headers are set for PUT endpoint
+    setCorsHeaders(req, res);
+    
     if (!req.body || req.body.length === 0) {
       console.error("❌ No image data provided in raw PUT request");
       return res.status(400).json({ error: 'No image data provided' });
@@ -167,7 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("❌ Error saving raw image:", error);
-      res.status(500).json({ error: 'Failed to save image' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ error: 'Failed to save image', details: errorMessage });
     }
   });
 
