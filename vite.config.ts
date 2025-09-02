@@ -2,23 +2,32 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath, URL } from "url";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import type { PluginOption } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
-  ],
+// Conditionally import Replit plugins only in development
+async function getPlugins(): Promise<PluginOption[]> {
+  const plugins: PluginOption[] = [react()];
+  
+  // Only load Replit plugins in development and when available
+  if (process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined) {
+    try {
+      const runtimeErrorOverlay = await import("@replit/vite-plugin-runtime-error-modal");
+      plugins.push(runtimeErrorOverlay.default());
+      
+      const cartographer = await import("@replit/vite-plugin-cartographer");
+      plugins.push(cartographer.cartographer());
+    } catch (error) {
+      console.log("Replit plugins not available, skipping...");
+    }
+  }
+  
+  return plugins;
+}
+
+export default defineConfig(async () => ({
+  plugins: await getPlugins(),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -37,4 +46,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));
