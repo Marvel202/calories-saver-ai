@@ -229,6 +229,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Handle CORS preflight for objects/upload endpoint
+  app.options("/api/objects/upload", (req, res) => {
+    console.log("🔧 CORS preflight for objects/upload endpoint");
+    setCorsHeaders(req, res);
+    res.sendStatus(200);
+  });
+
   app.post("/api/objects/upload", async (req, res) => {
     const isBrowser = req.headers['user-agent']?.includes('Mozilla') || req.headers['user-agent']?.includes('Chrome');
     const logPrefix = isBrowser ? "🌐 BROWSER" : "📡 CURL";
