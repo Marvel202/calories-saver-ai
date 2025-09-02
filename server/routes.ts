@@ -130,26 +130,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Handle PUT requests for upload (used by some upload libraries)
-  app.put("/api/upload-image", upload.single('image'), (req, res) => {
-    console.log("📸 REAL: PUT multipart image upload received");
+  // Handle PUT requests for upload (raw binary data from upload libraries)
+  app.put("/api/upload-image", express.raw({ type: '*/*', limit: '10mb' }), (req, res) => {
+    console.log("📸 REAL: PUT raw binary image upload received");
+    console.log("📸 DEBUG: Content-Type:", req.headers['content-type']);
+    console.log("📸 DEBUG: Body size:", req.body ? req.body.length : 0);
+    console.log("📸 DEBUG: Body type:", typeof req.body);
     
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+    if (!req.body || req.body.length === 0) {
+      console.error("❌ No image data provided in raw PUT request");
+      return res.status(400).json({ error: 'No image data provided' });
     }
 
-    // Generate the public URL for the uploaded image
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? `https://${req.get('host')}` 
-      : "http://localhost:3000";
-    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
-    console.log("📸 REAL: Image saved at:", imageUrl);
+    try {
+      // Generate unique filename
+      const timestamp = Date.now();
+      const random = Math.floor(Math.random() * 1000000);
+      const filename = `image-${timestamp}-${random}.jpg`;
+      const filepath = path.join(__dirname, '../uploads', filename);
+      
+      // Write the raw binary data to file
+      fs.writeFileSync(filepath, req.body);
+      console.log("📸 REAL: Raw image saved to:", filepath);
 
-    res.json({ 
-      success: true,
-      imageUrl: imageUrl,
-      filename: req.file.filename
-    });
+      // Generate the public URL for the uploaded image
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? `https://${req.get('host')}` 
+        : "http://localhost:3000";
+      const imageUrl = `${baseUrl}/uploads/${filename}`;
+      console.log("📸 REAL: Raw image URL:", imageUrl);
+
+      res.json({ 
+        success: true,
+        imageUrl: imageUrl,
+        filename: filename
+      });
+    } catch (error) {
+      console.error("❌ Error saving raw image:", error);
+      res.status(500).json({ error: 'Failed to save image' });
+    }
   });
 
   // Handle PUT uploads from Uppy (raw file data)
