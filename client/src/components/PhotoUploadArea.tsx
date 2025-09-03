@@ -198,8 +198,16 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
             // Check if we're using the new local upload endpoint
             if (uploadParams.url.includes('/api/upload-image')) {
               // For local uploads, the response contains the image URL
-              const responseText = await response.text();
-              finalURL = responseText; // PUT endpoint returns URL directly
+              const responseData = await response.json();
+              if (typeof responseData === 'string') {
+                // PUT endpoint might return URL directly as a string
+                finalURL = responseData;
+              } else if (responseData && typeof responseData === 'object' && responseData.imageUrl) {
+                // Response is JSON object with imageUrl field
+                finalURL = responseData.imageUrl;
+              } else {
+                throw new Error('Invalid response format from upload endpoint');
+              }
               console.log('🌐 BROWSER: Camera upload local mode, using real image URL:', finalURL);
             } else if (uploadParams.url.includes('/api/mock-upload')) {
               // Legacy mock upload fallback
