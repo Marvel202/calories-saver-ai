@@ -436,27 +436,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("🔍 [STEP 1] Starting meal analysis - Request body:", req.body);
       
-      const { imageUrl } = req.body;
-      
+      // Support cases where the frontend sends a raw stringified JSON body
+      let receivedBody: any = req.body;
+      if (typeof receivedBody === 'string') {
+        // Try to parse stringified JSON (some clients send JSON as a string)
+        try {
+          receivedBody = JSON.parse(receivedBody);
+          console.log('🔧 Parsed stringified request body into object');
+        } catch (parseErr) {
+          console.log('⚠️ Request body is a string but not JSON; using raw string');
+        }
+      }
+
+      // Determine imageUrl from possible shapes: plain string, or upload-response object
+      let imageUrl: any = undefined;
+      if (typeof receivedBody === 'string') {
+        imageUrl = receivedBody;
+      } else if (receivedBody && typeof receivedBody === 'object') {
+        // If frontend sent { imageUrl } or the upload response { success, imageUrl, filename }
+        if ('imageUrl' in receivedBody && typeof receivedBody.imageUrl === 'string') {
+          imageUrl = receivedBody.imageUrl;
+        } else if ('url' in receivedBody && typeof receivedBody.url === 'string') {
+          imageUrl = receivedBody.url;
+        } else if ('originalUrl' in receivedBody && typeof receivedBody.originalUrl === 'string') {
+          imageUrl = receivedBody.originalUrl;
+        } else {
+          // Maybe the client posted a wrapper { body: '{...}' }
+          console.log('⚠️ Received object body without imageUrl field:', Object.keys(receivedBody));
+        }
+      }
+
       if (!imageUrl) {
-        console.error("❌ [STEP 1] No image URL provided");
+        console.error("❌ [STEP 1] No image URL provided; request body:", typeof req.body === 'string' ? req.body.slice(0,1000) : JSON.stringify(req.body).slice(0,1000));
         return res.status(400).json({ error: "Image URL is required" });
       }
 
       console.log("📸 [STEP 2] Analyzing meal with image URL:", imageUrl);
       console.log("📸 [STEP 2] Image URL type:", typeof imageUrl);
 
-      // Handle case where imageUrl might be an object from upload response
-      let actualImageUrl: string;
-      if (typeof imageUrl === 'string') {
-        actualImageUrl = imageUrl;
-      } else if (typeof imageUrl === 'object' && imageUrl.imageUrl) {
-        console.log("🔧 [STEP 2] Extracting imageUrl from upload response object");
-        actualImageUrl = imageUrl.imageUrl;
-      } else {
-        console.error("❌ [STEP 2] Invalid imageUrl format:", imageUrl);
-        return res.status(400).json({ error: "Invalid image URL format" });
-      }
+      // Handle case where imageUrl might be an object — already normalized above, so imageUrl is a string
+      const actualImageUrl: string = imageUrl;
 
       console.log("📸 [STEP 3] Using actual image URL:", actualImageUrl);
 
@@ -470,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("🔄 [STEP 3] Using object storage mode");
         // Production mode with object storage: normalize the object path
         const objectStorageService = new ObjectStorageService();
-        const normalizedPath = objectStorageService.normalizeObjectEntityPath(imageUrl);
+  const normalizedPath = objectStorageService.normalizeObjectEntityPath(actualImageUrl);
 
         // Use the actual Replit app URL (always HTTPS in production)
         const appUrl = process.env.APP_URL || 'https://calorie-snap-marvel202.replit.app';
@@ -501,22 +520,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let imageBuffer: Buffer;
       let imagePath: string;
       
-      console.log("🔍 Checking image URL format:", imageUrl);
-      
+      console.log("🔍 Checking image URL format:", accessibleImageUrl);
+
       // In production (Render), always fetch via HTTP since local storage is ephemeral
-      if (process.env.NODE_ENV === 'production' || !imageUrl.includes('/uploads/')) {
+      if (process.env.NODE_ENV === 'production' || !accessibleImageUrl.includes('/uploads/')) {
         // External URL or production - fetch the image via HTTP
-        console.log("📸 Fetching image via HTTP (production mode):", imageUrl);
-        const imageResponse = await fetch(imageUrl);
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+        console.log("📸 Fetching image via HTTP (production mode):", accessibleImageUrl);
+        let imageResponse;
+        try {
+          imageResponse = await fetch(accessibleImageUrl);
+        } catch (fetchErr) {
+          console.error("❌ Fetch error (network) when fetching image:", fetchErr instanceof Error ? fetchErr.message : String(fetchErr));
+          throw new Error(`Network error fetching image: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`);
         }
+
+        console.log("📸 Fetch response status:", imageResponse.status);
+        try {
+          const contentType = imageResponse.headers && typeof imageResponse.headers.get === 'function' ? imageResponse.headers.get('content-type') : undefined;
+          const contentLength = imageResponse.headers && typeof imageResponse.headers.get === 'function' ? imageResponse.headers.get('content-length') : undefined;
+          console.log("📸 Fetch response headers: content-type=", contentType, "content-length=", contentLength);
+        } catch (hdrErr) {
+          console.warn("⚠️ Could not read response headers:", hdrErr instanceof Error ? hdrErr.message : String(hdrErr));
+        }
+
+        if (!imageResponse.ok) {
+          const statusText = imageResponse.statusText || '';
+          let respSnippet = '';
+          try {
+            const txt = await imageResponse.text();
+            respSnippet = txt.slice(0, 1000);
+          } catch (txtErr) {
+            respSnippet = `Unable to read response text: ${txtErr instanceof Error ? txtErr.message : String(txtErr)}`;
+          }
+          console.error("❌ Failed to fetch image. Status:", imageResponse.status, statusText, "Response snippet:", respSnippet);
+          throw new Error(`Failed to fetch image: ${imageResponse.status} ${statusText}`);
+        }
+
         const arrayBuffer = await imageResponse.arrayBuffer();
         imageBuffer = Buffer.from(arrayBuffer);
         console.log("📸 Fetched image via HTTP. Size:", imageBuffer.length, "bytes");
-      } else if (imageUrl.includes('/uploads/')) {
+      } else if (accessibleImageUrl.includes('/uploads/')) {
         // Local development - read from disk
-        const filename = imageUrl.split('/uploads/')[1];
+          const filename = accessibleImageUrl.split('/uploads/')[1];
         imagePath = path.join(__dirname, '../uploads', filename);
         
         console.log("📂 Attempting to read local file:");
@@ -556,31 +601,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       formData.append('mimeType', 'image/jpeg');
       
       console.log("🚀 Sending request to n8n webhook...");
-      
-      const n8nResponse = await axios.post(n8nWebhookUrl, formData, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-          ...formData.getHeaders()  // This sets Content-Type: multipart/form-data with boundary
-        },
-        timeout: 30000  // 30 second timeout
-      });
+
+      let n8nResponse;
+      try {
+        n8nResponse = await axios.post(n8nWebhookUrl, formData, {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+            ...formData.getHeaders()  // This sets Content-Type: multipart/form-data with boundary
+          },
+          timeout: 30000  // 30 second timeout
+        });
+      } catch (axiosErr: any) {
+        // Axios error - capture response details if present
+        console.error("❌ Axios error when calling n8n webhook:", axiosErr && axiosErr.message ? axiosErr.message : axiosErr);
+        if (axiosErr && axiosErr.response) {
+          try {
+            console.error("❌ n8n response status:", axiosErr.response.status);
+            console.error("❌ n8n response data:", typeof axiosErr.response.data === 'string' ? axiosErr.response.data.slice(0,1000) : JSON.stringify(axiosErr.response.data, null, 2).slice(0,1000));
+          } catch (e) {
+            console.error("❌ Could not stringify axios error response:", e);
+          }
+        }
+        throw new Error(`Failed to POST to n8n webhook: ${axiosErr && axiosErr.message ? axiosErr.message : String(axiosErr)}`);
+      }
 
       console.log("✅ n8n webhook response status:", n8nResponse.status);
+      try {
+        const respSnippet = typeof n8nResponse.data === 'string' ? n8nResponse.data.slice(0,1000) : JSON.stringify(n8nResponse.data, null, 2).slice(0,1000);
+        console.log("✅ n8n response snippet:", respSnippet);
+      } catch (snipErr) {
+        console.warn("⚠️ Unable to serialize n8n response snippet:", snipErr instanceof Error ? snipErr.message : String(snipErr));
+      }
 
       if (n8nResponse.status !== 200) {
         const responseText = typeof n8nResponse.data === 'string' ? n8nResponse.data : JSON.stringify(n8nResponse.data);
         console.error("n8n webhook error response:", responseText);
         console.error("Response status:", n8nResponse.status);
-        
+
         if (responseText.includes("test mode") || responseText.includes("Execute workflow")) {
           throw new Error("n8n webhook is in test mode. Please click 'Execute workflow' in n8n canvas and try again.");
         }
-        
+
         throw new Error(`n8n workflow failed: ${n8nResponse.status} - ${responseText}`);
       }
 
       const n8nData = n8nResponse.data;
-      console.log("n8n response received:", JSON.stringify(n8nData, null, 2));
+      console.log("n8n response received (full truncated):", (() => {
+        try { return JSON.stringify(n8nData, null, 2).slice(0,2000); } catch (e) { return String(n8nData).slice(0,2000); }
+      })());
       
       // Check if n8n is returning a "workflow started" message instead of results
       if (n8nData.message === "Workflow was started") {
@@ -605,19 +673,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("🍽️ Extracted nutrition data:", JSON.stringify(nutritionData, null, 2));
       
-      // Validate the nutrition data from n8n
-      const nutrition = nutritionDataSchema.parse(nutritionData);
+      // Validate the nutrition data from n8n with guarded error logging
+      let nutrition;
+      try {
+        nutrition = nutritionDataSchema.parse(nutritionData);
+      } catch (zErr) {
+        console.error("❌ Nutrition data failed schema validation:", zErr instanceof Error ? zErr.message : String(zErr));
+        try {
+          // If it's a ZodError, log detailed issues
+          if (zErr && typeof zErr === 'object' && 'issues' in (zErr as any)) {
+            console.error("❌ Zod issues:", JSON.stringify((zErr as any).issues, null, 2));
+          }
+        } catch (inner) {
+          console.error("⚠️ Could not stringify Zod error issues:", inner instanceof Error ? inner.message : String(inner));
+        }
+        throw new Error('Nutrition data from n8n did not match expected schema');
+      }
       
       // Store the analysis in memory
       const analysis = await storage.createMealAnalysis({
-        imageUrl: imageUrl,
+        imageUrl: accessibleImageUrl,
         nutrition,
       });
 
       res.json({
         analysisId: analysis.id,
         nutrition,
-        imageUrl: imageUrl,
+        imageUrl: accessibleImageUrl,
       });
 
     } catch (error) {
@@ -666,6 +748,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error submitting feedback:", error);
       res.status(500).json({ error: "Failed to submit feedback" });
+    }
+  });
+
+  // Temporary test endpoint: fetch an image URL, POST bytes to n8n, and return parsed nutrition
+  app.post('/api/test-analyze-url', async (req, res) => {
+    try {
+      console.log('🧪 [TEST] /api/test-analyze-url called with body:', JSON.stringify(req.body).slice(0,1000));
+
+      let { imageUrl } : { imageUrl?: string } = req.body || {};
+
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        // Try parsing string body
+        if (typeof req.body === 'string') {
+          try {
+            const parsed = JSON.parse(req.body);
+            imageUrl = parsed.imageUrl || parsed.url || parsed.originalUrl;
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        console.error('🧪 [TEST] Missing or invalid imageUrl in request');
+        return res.status(400).json({ error: 'imageUrl string required in JSON body' });
+      }
+
+      console.log('🧪 [TEST] Fetching image:', imageUrl);
+      let response;
+      try {
+        response = await fetch(imageUrl);
+      } catch (err) {
+        console.error('🧪 [TEST] Network error fetching image:', err instanceof Error ? err.message : String(err));
+        return res.status(502).json({ error: 'Failed to fetch image', details: err instanceof Error ? err.message : String(err) });
+      }
+
+      if (!response.ok) {
+        const txt = await response.text().catch(() => 'Unable to read response body');
+        console.error('🧪 [TEST] Image fetch returned non-200:', response.status, txt.slice(0,200));
+        return res.status(502).json({ error: 'Image fetch failed', status: response.status, bodySnippet: txt.slice(0,200) });
+      }
+
+      const buf = Buffer.from(await response.arrayBuffer());
+      console.log('🧪 [TEST] Fetched image bytes, size:', buf.length);
+
+      const formData = new FormData();
+      formData.append('image', buf, { filename: 'test_image.jpg', contentType: 'image/jpeg' });
+      formData.append('timestamp', new Date().toISOString());
+      formData.append('mimeType', 'image/jpeg');
+
+      const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "https://glorious-orca-novel.ngrok-free.app/webhook/e52946b4-075f-472b-8242-d245d1b12a92";
+      console.log('🧪 [TEST] Posting to n8n webhook:', n8nWebhookUrl);
+
+      let n8nResponse;
+      try {
+        n8nResponse = await axios.post(n8nWebhookUrl, formData, {
+          headers: { ...formData.getHeaders(), 'ngrok-skip-browser-warning': 'true' },
+          timeout: 30000
+        });
+      } catch (err: any) {
+        console.error('🧪 [TEST] Axios error posting to n8n:', err && err.message);
+        if (err && err.response) {
+          console.error('🧪 [TEST] n8n response status:', err.response.status);
+          console.error('🧪 [TEST] n8n response data snippet:', JSON.stringify(err.response.data).slice(0,1000));
+        }
+        return res.status(502).json({ error: 'Failed to call n8n webhook', details: err && err.message });
+      }
+
+      console.log('🧪 [TEST] n8n responded with status:', n8nResponse.status);
+      const n8nData = n8nResponse.data;
+      console.log('🧪 [TEST] n8n data (truncated):', (() => { try { return JSON.stringify(n8nData).slice(0,2000) } catch { return String(n8nData).slice(0,2000) } })());
+
+      // Extract nutrition data similar to analyze-meal
+      let nutritionData;
+      if (Array.isArray(n8nData) && n8nData.length > 0 && n8nData[0].output) {
+        nutritionData = n8nData[0].output;
+      } else if (n8nData.output) {
+        nutritionData = n8nData.output;
+      } else if (n8nData.status && n8nData.food && n8nData.total) {
+        nutritionData = n8nData;
+      } else {
+        console.error('🧪 [TEST] Unexpected n8n response format');
+        return res.status(502).json({ error: 'Unexpected n8n response format', n8nData });
+      }
+
+      try {
+        const nutrition = nutritionDataSchema.parse(nutritionData);
+        return res.json({ success: true, nutrition, raw: nutritionData });
+      } catch (zErr) {
+        console.error('🧪 [TEST] Nutrition parse failed:', zErr instanceof Error ? zErr.message : String(zErr));
+        return res.status(502).json({ error: 'Nutrition parsing failed', details: zErr instanceof Error ? zErr.message : String(zErr), nutritionData });
+      }
+
+    } catch (error) {
+      console.error('🧪 [TEST] Unexpected error:', error);
+      return res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) });
     }
   });
 
