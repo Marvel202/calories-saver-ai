@@ -25,6 +25,8 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       // TEMPORARILY: Always use the real endpoint to test n8n webhook
       const endpoint = '/api/analyze-meal';
       console.log("🌐 BROWSER: Using endpoint:", endpoint, "for image:", imageUrl);
+      console.log("🌐 BROWSER: Image URL type:", typeof imageUrl);
+      console.log("🌐 BROWSER: Image URL value:", JSON.stringify(imageUrl));
       
       const res = await apiRequest("POST", endpoint, { imageUrl });
       return res.json();
