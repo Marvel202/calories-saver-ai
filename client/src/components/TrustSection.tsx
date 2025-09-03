@@ -5,7 +5,7 @@ export function TrustSection() {
     {
       icon: Zap,
       title: "Instant Analysis",
-      description: "Results in under 3 seconds",
+      description: "Results under fingertip",
       color: "text-primary bg-primary/15"
     },
     {
@@ -41,7 +41,10 @@ export function TrustSection() {
                 const Icon = feature.icon;
                 return (
                   <div key={index} className="flex items-center space-x-6" data-testid={`feature-${index + 1}`}>
-                    <button className={`w-16 h-16 ${feature.color} rounded-3xl flex items-center justify-center elevation-2 hover-lift tactile-button hover:elevation-3 transition-all duration-200`}>
+                    <button 
+                      className={`w-16 h-16 ${feature.color} rounded-3xl flex items-center justify-center elevation-2 hover-lift tactile-button hover:elevation-3 transition-all duration-200`}
+                      aria-label={feature.title}
+                    >
                       <Icon size={32} />
                     </button>
                     <div>

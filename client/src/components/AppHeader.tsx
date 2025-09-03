@@ -6,8 +6,8 @@ export function AppHeader() {
     <header className="relative z-50 surface-translucent border-b border-gray-300">
       <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center elevation-3 hover-lift border border-red-400/30 shadow-lg">
-            <Utensils className="text-white filter drop-shadow-md" size={24} />
+          <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center elevation-1 hover-lift border border-gray-200/30">
+            <Utensils className="text-gray-600" size={24} />
           </div>
           <span className="font-bold text-xl text-gray-900">Calories Saver AI</span>
         </div>

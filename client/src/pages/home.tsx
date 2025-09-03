@@ -50,7 +50,7 @@ export default function Home() {
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
-                Upload a photo of your meal and get instant macronutrient breakdown powered by AI in <a href="#methodology" className="text-primary underline hover:text-primary/80">under 3 seconds</a>. Track protein, carbs, and fat effortlessly.
+                Upload a photo of your meal and get instant macronutrient breakdown powered by AI <a href="#methodology" className="text-primary underline hover:text-primary/80">under fingertip</a>. Track protein, carbs, and fat effortlessly.
               </p>
             </div>
 

@@ -291,19 +291,22 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       >
         {!isAnalyzing ? (
           <div data-testid="upload-content">
-            <div className="w-28 h-28 bg-primary/20 rounded-3xl flex items-center justify-center mb-8 mx-auto elevation-2 hover-lift">
+            <div 
+              className="w-28 h-28 bg-primary/20 rounded-3xl flex items-center justify-center mb-8 mx-auto elevation-2 hover-lift cursor-pointer"
+              onClick={openCamera}
+            >
               <Camera className="text-primary text-3xl" size={48} />
             </div>
             <h3 className="text-3xl font-bold text-gray-900 mb-4">Upload Your Meal</h3>
             <p className="text-gray-700 mb-12 text-xl font-medium">Take a photo or upload from gallery</p>
             
-            <div className="flex flex-col sm:flex-row gap-8 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center w-full max-w-md mx-auto">
               <Button 
                 onClick={openCamera}
-                className="tactile-button px-10 py-5 bg-primary text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4 pulse-primary"
+                className="tactile-button px-6 sm:px-10 py-4 sm:py-5 bg-primary text-gray-900 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center space-x-3 sm:space-x-4 pulse-primary w-full sm:w-auto"
                 data-testid="button-camera"
               >
-                <Camera size={28} className="text-gray-900" />
+                <Camera size={24} className="text-gray-900" />
                 <span>Take Photo</span>
               </Button>
               
@@ -312,9 +315,9 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
                 maxFileSize={10485760}
                 onGetUploadParameters={handleGetUploadParameters}
                 onComplete={handleUploadComplete}
-                buttonClassName="tactile-button px-10 py-5 bg-gray-100 text-gray-900 rounded-2xl font-bold text-lg flex items-center justify-center space-x-4"
+                buttonClassName="tactile-button px-6 sm:px-10 py-4 sm:py-5 bg-gray-100 text-gray-900 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center space-x-3 sm:space-x-4 w-full sm:w-auto"
               >
-                <Images size={28} />
+                <Images size={24} />
                 <span>From Gallery</span>
               </ObjectUploader>
             </div>
@@ -338,6 +341,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
         className="hidden"
         onChange={handleFileInputChange}
         data-testid="input-file"
+        aria-label="Upload image file"
       />
     </div>
   );
