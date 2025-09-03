@@ -31,7 +31,7 @@ export function HowItWorksSection() {
             How It Works
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto font-medium">
-            Our advanced AI analyzes your meal photos to provide accurate nutritional information in seconds.
+            Our advanced AI analyzes your meal photos to provide accurate nutritional information under fingertip.
           </p>
         </div>
         
