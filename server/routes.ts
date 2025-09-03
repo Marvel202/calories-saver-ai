@@ -451,7 +451,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine imageUrl from possible shapes: plain string, or upload-response object
       let imageUrl: any = undefined;
       if (typeof receivedBody === 'string') {
-        imageUrl = receivedBody;
+        // If it's a string, try to parse it as JSON first, then use as URL
+        try {
+          const parsed = JSON.parse(receivedBody);
+          if (typeof parsed === 'object' && parsed.imageUrl) {
+            imageUrl = parsed.imageUrl;
+          } else {
+            imageUrl = receivedBody; // Use the string as-is if it's not parseable JSON
+          }
+        } catch (parseErr) {
+          imageUrl = receivedBody; // Use the string as-is if it's not valid JSON
+        }
       } else if (receivedBody && typeof receivedBody === 'object') {
         // If frontend sent { imageUrl } or the upload response { success, imageUrl, filename }
         if ('imageUrl' in receivedBody && typeof receivedBody.imageUrl === 'string') {
@@ -466,46 +476,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      if (!imageUrl) {
-        console.error("❌ [STEP 1] No image URL provided; request body:", typeof req.body === 'string' ? req.body.slice(0,1000) : JSON.stringify(req.body).slice(0,1000));
-        return res.status(400).json({ error: "Image URL is required" });
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        console.error("❌ [STEP 1] No valid image URL found; request body:", typeof req.body === 'string' ? req.body.slice(0,1000) : JSON.stringify(req.body).slice(0,1000));
+        return res.status(400).json({ error: "Valid image URL string is required" });
       }
 
       console.log("📸 [STEP 2] Analyzing meal with image URL:", imageUrl);
       console.log("📸 [STEP 2] Image URL type:", typeof imageUrl);
 
-      // Handle case where imageUrl might be an object — already normalized above, so imageUrl is a string
-      const actualImageUrl: string = imageUrl;
+      // Ensure we have a clean string URL
+      const actualImageUrl: string = String(imageUrl).trim();
 
       console.log("📸 [STEP 3] Using actual image URL:", actualImageUrl);
 
       // Use the imageUrl directly - it should already be accessible
       let accessibleImageUrl = actualImageUrl;
       
-      // If we don't have PRIVATE_OBJECT_DIR (using local storage), use imageUrl as-is
-      if (!process.env.PRIVATE_OBJECT_DIR) {
-        console.log("✅ [STEP 3] Using local storage - image URL:", accessibleImageUrl);
-      } else {
-        console.log("🔄 [STEP 3] Using object storage mode");
-        // Production mode with object storage: normalize the object path
-        const objectStorageService = new ObjectStorageService();
-  const normalizedPath = objectStorageService.normalizeObjectEntityPath(actualImageUrl);
-
-        // Use the actual Replit app URL (always HTTPS in production)
-        const appUrl = process.env.APP_URL || 'https://calorie-snap-marvel202.replit.app';
-        accessibleImageUrl = `${appUrl}${normalizedPath}`;
-
-        console.log("Creating accessible image URL:", accessibleImageUrl);
-        
-        // Optional: Verify the image exists locally first (faster)
-        try {
-          const objectFile = await objectStorageService.getObjectEntityFile(normalizedPath);
-          console.log("Image file verified in storage");
-        } catch (error) {
-          console.error("Image not found in storage:", error);
-          throw new Error("Image not found in storage");
-        }
-      }
+      console.log("✅ [STEP 3] Using image URL:", accessibleImageUrl);
+      console.log("✅ [STEP 3] Image URL type after processing:", typeof accessibleImageUrl);
 
       // Call n8n webhook with the actual image file
       console.log("🚀 [STEP 4] Calling real n8n webhook for AI analysis");
