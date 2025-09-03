@@ -756,7 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🧪 [TEST] /api/test-analyze-url called with body:', JSON.stringify(req.body).slice(0,1000));
 
-      let { imageUrl } : { imageUrl?: string } = req.body || {};
+      let { imageUrl, mockResponse } : { imageUrl?: string, mockResponse?: boolean } = req.body || {};
 
       if (!imageUrl || typeof imageUrl !== 'string') {
         // Try parsing string body
@@ -764,6 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const parsed = JSON.parse(req.body);
             imageUrl = parsed.imageUrl || parsed.url || parsed.originalUrl;
+            mockResponse = parsed.mockResponse;
           } catch (e) {
             // ignore
           }
@@ -792,6 +793,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const buf = Buffer.from(await response.arrayBuffer());
       console.log('🧪 [TEST] Fetched image bytes, size:', buf.length);
+
+      // If mockResponse is true, skip n8n and return mock data
+      if (mockResponse) {
+        console.log('🧪 [TEST] Using mock nutrition data (bypassing n8n)');
+        const mockNutrition = {
+          status: "success",
+          food: [
+            {
+              name: "Mixed Vegetables",
+              quantity: "1 cup (120g)", 
+              calories: 50,
+              protein: 2,
+              carbs: 10,
+              fat: 0
+            }
+          ],
+          total: {
+            calories: 50,
+            protein: 2,
+            carbs: 10,
+            fat: 0
+          }
+        };
+
+        try {
+          const nutrition = nutritionDataSchema.parse(mockNutrition);
+          return res.json({ success: true, nutrition, raw: mockNutrition, note: 'Using mock data - n8n bypassed' });
+        } catch (zErr) {
+          console.error('🧪 [TEST] Mock nutrition parse failed:', zErr instanceof Error ? zErr.message : String(zErr));
+          return res.status(500).json({ error: 'Mock nutrition parsing failed', details: zErr instanceof Error ? zErr.message : String(zErr) });
+        }
+      }
 
       const formData = new FormData();
       formData.append('image', buf, { filename: 'test_image.jpg', contentType: 'image/jpeg' });
