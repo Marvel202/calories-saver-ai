@@ -2,8 +2,6 @@ import { useState, useRef, useCallback } from "react";
 import { Camera, Images, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ObjectUploader } from "@/components/ObjectUploader";
-import type { UploadResult } from "@uppy/core";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,7 +14,6 @@ interface PhotoUploadAreaProps {
 export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -99,51 +96,6 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
     }
   };
 
-  const handleUploadComplete = useCallback((result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful.length > 0) {
-      let imageUrl = result.successful[0].uploadURL;
-      
-      // Check if we're using the new local upload endpoint
-      if (imageUrl && imageUrl.includes('/api/upload-image')) {
-        // For local uploads, the uploadURL is the endpoint, but we need the response
-        // Uppy should have stored the response in the result
-        const response = result.successful[0].response;
-        if (typeof response === 'string') {
-          // PUT endpoint returns the image URL directly as a string
-          imageUrl = response;
-        } else if (response && typeof response === 'object' && 'imageUrl' in response) {
-          // POST endpoint returns JSON with imageUrl field
-          imageUrl = (response as any).imageUrl;
-        }
-        console.log("🌐 BROWSER: Local upload detected, using real image URL:", imageUrl);
-      }
-      
-      // Legacy: Development mode fallback for mock uploads
-      if (imageUrl && imageUrl.includes('/api/mock-upload')) {
-        imageUrl = "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?w=800&h=600&fit=crop";
-        console.log("🌐 BROWSER: Mock upload detected, using placeholder image URL:", imageUrl);
-      }
-      
-      if (imageUrl) {
-        setIsAnalyzing(true);
-        setProgress(0);
-        
-        // Simulate progress
-        const progressInterval = setInterval(() => {
-          setProgress(prev => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + Math.random() * 30;
-          });
-        }, 200);
-
-        analyzeImageMutation.mutate(imageUrl);
-      }
-    }
-  }, [analyzeImageMutation]);
-
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -182,13 +134,13 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
       // Use a direct upload approach similar to what Uppy does internally
       handleGetUploadParameters()
         .then(uploadParams => {
-          console.log('Camera upload: Got upload params');
+          console.log('File upload: Got upload params');
           
           return fetch(uploadParams.url, {
             method: uploadParams.method,
             body: file,
           }).then(async response => {
-            console.log('Camera upload: Response status:', response.status);
+            console.log('File upload: Response status:', response.status);
             if (!response.ok) {
               throw new Error(`Upload failed with status: ${response.status}`);
             }
@@ -208,30 +160,30 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
               } else {
                 throw new Error('Invalid response format from upload endpoint');
               }
-              console.log('🌐 BROWSER: Camera upload local mode, using real image URL:', finalURL);
+              console.log('🌐 BROWSER: File upload local mode, using real image URL:', finalURL);
             } else if (uploadParams.url.includes('/api/mock-upload')) {
               // Legacy mock upload fallback
               finalURL = "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?w=800&h=600&fit=crop";
-              console.log('🌐 BROWSER: Camera upload mock mode, using placeholder image URL:', finalURL);
+              console.log('🌐 BROWSER: File upload mock mode, using placeholder image URL:', finalURL);
             } else {
               // Default behavior for other endpoints
               finalURL = uploadParams.url.split('?')[0];
-              console.log('🌐 BROWSER: Camera upload default mode, using endpoint URL:', finalURL);
+              console.log('🌐 BROWSER: File upload default mode, using endpoint URL:', finalURL);
             }
             
-            console.log('Camera upload: Success, final URL:', finalURL);
+            console.log('File upload: Success, final URL:', finalURL);
             
             // Clear progress interval
             clearInterval(progressInterval);
             
-            // Directly trigger analysis like ObjectUploader does
+            // Directly trigger analysis
             analyzeImageMutation.mutate(finalURL);
             
             return finalURL;
           });
         })
         .catch(error => {
-          console.error('Camera upload error:', error);
+          console.error('File upload error:', error);
           clearInterval(progressInterval);
           setIsAnalyzing(false);
           setProgress(0);
@@ -241,28 +193,6 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
             variant: "destructive",
           });
         });
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0 && files[0].type.startsWith('image/')) {
-      if (fileInputRef.current) {
-        fileInputRef.current.files = files;
-        handleFileInputChange({ target: { files } } as any);
-      }
     }
   };
 
@@ -283,10 +213,7 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
   return (
     <div className="elevation-3 rounded-3xl p-16 md:p-20 hover-lift">
       <div 
-        className={`upload-area rounded-3xl p-16 text-center min-h-96 flex flex-col justify-center items-center cursor-pointer ${dragOver ? 'dragover' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        className="upload-area rounded-3xl p-16 text-center min-h-96 flex flex-col justify-center items-center"
         data-testid="upload-area"
       >
         {!isAnalyzing ? (
@@ -310,16 +237,14 @@ export function PhotoUploadArea({ onAnalysisComplete }: PhotoUploadAreaProps) {
                 <span>Take Photo</span>
               </Button>
               
-              <ObjectUploader
-                maxNumberOfFiles={1}
-                maxFileSize={10485760}
-                onGetUploadParameters={handleGetUploadParameters}
-                onComplete={handleUploadComplete}
-                buttonClassName="tactile-button px-6 sm:px-10 py-4 sm:py-5 bg-gray-100 text-gray-900 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center space-x-3 sm:space-x-4 w-full sm:w-auto"
+              <Button
+                onClick={openGallery}
+                className="tactile-button px-6 sm:px-10 py-4 sm:py-5 bg-gray-100 text-gray-900 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center space-x-3 sm:space-x-4 w-full sm:w-auto"
+                data-testid="button-gallery"
               >
                 <Images size={24} />
                 <span>From Gallery</span>
-              </ObjectUploader>
+              </Button>
             </div>
           </div>
         ) : (

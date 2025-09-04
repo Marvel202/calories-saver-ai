@@ -208,11 +208,11 @@ export function NutritionResults({ nutrition, imageUrl, onRetry }: NutritionResu
           </Button>
           <Button 
             onClick={handleShare}
-            className="tactile-button px-8 py-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-2xl font-semibold flex items-center space-x-3 elevation-2 shadow-lg"
+            className="tactile-button px-8 py-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-gray-900 rounded-2xl font-semibold flex items-center space-x-3 elevation-2 shadow-lg"
             data-testid="button-share"
           >
-            <Share2 size={24} />
-            <span>Share</span>
+            <Share2 size={24} className="text-gray-900" />
+            <span className="text-gray-900">Share</span>
           </Button>
         </div>
       </div>
